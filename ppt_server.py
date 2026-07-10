@@ -150,33 +150,7 @@ def is_fuzzy_match(q_word, target_word):
 # --- EXTRAGERE TEXT ȘI DIAPOZITIVE ---
 
 def extract_pptx_text(file_path):
-    try:
-        import pptx
-        prs = pptx.Presentation(file_path)
-        text_runs = []
-        
-        def extract_text_from_shape(shape):
-            if shape.has_text_frame:
-                for paragraph in shape.text_frame.paragraphs:
-                    for run in paragraph.runs:
-                        if run.text.strip():
-                            text_runs.append(run.text.strip())
-            if shape.has_table:
-                for row in shape.table.rows:
-                    for cell in row.cells:
-                        if cell.text.strip():
-                            text_runs.append(cell.text.strip())
-            if hasattr(shape, "shapes"):
-                for sub_shape in shape.shapes:
-                    extract_text_from_shape(sub_shape)
-                    
-        for slide in prs.slides:
-            for shape in slide.shapes:
-                extract_text_from_shape(shape)
-                
-        return "\n".join(text_runs)
-    except Exception:
-        return ""
+    return "\n".join(extract_pptx_slides(file_path))
 
 def extract_pptx_slides(file_path):
     try:
@@ -267,45 +241,7 @@ def extract_ppt_text_carving(file_path):
         return ""
 
 def extract_ppt_text_com(ppt_app, file_path):
-    pres = None
-    try:
-        file_path_abs = os.path.abspath(file_path)
-        pres = ppt_app.Presentations.Open(file_path_abs, ReadOnly=True, WithWindow=False)
-        text_runs = []
-        
-        def extract_text_from_com_shape(shape):
-            if shape.HasTextFrame and shape.TextFrame.HasText:
-                text_runs.append(shape.TextFrame.TextRange.Text)
-            if shape.HasTable:
-                table = shape.Table
-                for r_idx in range(1, table.Rows.Count + 1):
-                    for c_idx in range(1, table.Columns.Count + 1):
-                        cell = table.Cell(r_idx, c_idx)
-                        if cell.Shape.HasTextFrame and cell.Shape.TextFrame.HasText:
-                            text_runs.append(cell.Shape.TextFrame.TextRange.Text)
-            if shape.Type == 6: # msoGroup
-                try:
-                    for sub_shape in shape.GroupItems:
-                        extract_text_from_com_shape(sub_shape)
-                except Exception:
-                    pass
-
-        for slide in pres.Slides:
-            for shape in slide.Shapes:
-                extract_text_from_com_shape(shape)
-                
-        try:
-            pres.Close()
-        except Exception:
-            pass
-        return "\n".join(text_runs)
-    except Exception:
-        if pres:
-            try:
-                pres.Close()
-            except Exception:
-                pass
-        return ""
+    return "\n".join(extract_ppt_slides_com(ppt_app, file_path))
 
 def extract_ppt_slides_com(ppt_app, file_path):
     pres = None
@@ -516,6 +452,18 @@ def run_indexing_thread():
         return
 
     # Faza 2: Extragere conținut diapozitive
+    ppt_app_available = False
+    try:
+        import win32com.client
+        import pythoncom
+        pythoncom.CoInitialize()
+        test_app = win32com.client.Dispatch("PowerPoint.Application")
+        test_app.Quit()
+        pythoncom.CoUninitialize()
+        ppt_app_available = True
+    except Exception:
+        pass
+
     com_fallback_queue = []
     fallback_lock = threading.Lock()
     write_lock = threading.Lock()
@@ -526,35 +474,48 @@ def run_indexing_thread():
         file_name = os.path.basename(file_path)
         title_no_ext, _ = os.path.splitext(file_name)
         
-        content = ""
-        slides = []
         is_pptx = file_path.lower().endswith('.pptx')
         
-        if is_pptx:
-            content = extract_pptx_text(file_path)
-            # Obținere structuri slide-uri în fundal pentru proiecția locală de generație următoare
-            slides_raw = extract_pptx_slides(file_path)
-            slides = [{"label": f"Slide {i+1}", "text": s} for i, s in enumerate(slides_raw)]
-        else:
-            content = extract_ppt_text_carving(file_path)
-            slides = [{"label": f"Slide {i+1}", "text": p.strip()} for i, p in enumerate(re.split(r'\n\n+', content)) if p.strip()]
-            
-        if not is_pptx and not content.strip():
+        # Dacă este .ppt și COM este disponibil, îl redirecționăm către Faza 3 COM
+        if not is_pptx and ppt_app_available:
             with fallback_lock:
                 com_fallback_queue.append(item)
             return
             
+        slides_raw = []
+        if is_pptx:
+            slides_raw = extract_pptx_slides(file_path)
+        else:
+            content_carve = extract_ppt_text_carving(file_path)
+            slides_raw = [p.strip() for p in re.split(r'\n\n+', content_carve) if p.strip()]
+            
+        # Adăugare primele 5 cuvinte din fiecare slide la sfârșitul conținutului indexat
+        main_content = "\n".join(slides_raw)
+        first_5_words = []
+        for s in slides_raw:
+            w = s.split()
+            if w:
+                first_5_words.append(" ".join(w[:5]))
+        first_5_text = " ".join(first_5_words)
+        
+        if first_5_text:
+            full_content = main_content + "\n\n" + first_5_text
+        else:
+            full_content = main_content
+            
+        slides = [{"label": f"Slide {i+1}", "text": s} for i, s in enumerate(slides_raw)]
+        
         with write_lock:
             with index_lock:
                 norm_title = normalize_text(title_no_ext)
-                norm_content = normalize_text(content)
+                norm_content = normalize_text(full_content)
                 index_data[file_path] = {
                     "path": file_path,
                     "name": file_name,
                     "title": title_no_ext,
                     "norm_title": norm_title,
                     "mtime": mtime,
-                    "content": content,
+                    "content": full_content,
                     "norm_content": norm_content,
                     "slides": slides
                 }
@@ -577,7 +538,7 @@ def run_indexing_thread():
     with ThreadPoolExecutor(max_workers=max_threads) as executor:
         executor.map(process_file_worker, files_to_process)
         
-    # Faza 3: Rezervă (fallback) secvențială COM pentru fișierele .ppt mai vechi care au eșuat la extragerea brută
+    # Faza 3: Rezervă (fallback) secvențială COM pentru fișierele .ppt mai vechi care au eșuat la extragerea brută sau e preferat COM
     if com_fallback_queue:
         ppt_app = None
         try:
@@ -592,23 +553,39 @@ def run_indexing_thread():
             file_name = os.path.basename(file_path)
             title_no_ext, _ = os.path.splitext(file_name)
             
-            content = ""
-            slides = []
+            slides_raw = []
             if ppt_app:
-                content = extract_ppt_text_com(ppt_app, file_path)
                 slides_raw = extract_ppt_slides_com(ppt_app, file_path)
-                slides = [{"label": f"Slide {i+1}", "text": s} for i, s in enumerate(slides_raw)]
                 
+            if not slides_raw:
+                content_carve = extract_ppt_text_carving(file_path)
+                slides_raw = [p.strip() for p in re.split(r'\n\n+', content_carve) if p.strip()]
+                
+            main_content = "\n".join(slides_raw)
+            first_5_words = []
+            for s in slides_raw:
+                w = s.split()
+                if w:
+                    first_5_words.append(" ".join(w[:5]))
+            first_5_text = " ".join(first_5_words)
+            
+            if first_5_text:
+                full_content = main_content + "\n\n" + first_5_text
+            else:
+                full_content = main_content
+                
+            slides = [{"label": f"Slide {i+1}", "text": s} for i, s in enumerate(slides_raw)]
+            
             with index_lock:
                 norm_title = normalize_text(title_no_ext)
-                norm_content = normalize_text(content)
+                norm_content = normalize_text(full_content)
                 index_data[file_path] = {
                     "path": file_path,
                     "name": file_name,
                     "title": title_no_ext,
                     "norm_title": norm_title,
                     "mtime": mtime,
-                    "content": content,
+                    "content": full_content,
                     "norm_content": norm_content,
                     "slides": slides
                 }
@@ -1111,6 +1088,29 @@ def home():
       box-sizing: border-box;
     }
 
+    .folder-group-header {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--secondary-accent);
+      background: rgba(0, 229, 255, 0.05);
+      border-left: 3px solid var(--secondary-accent);
+      padding: 8px 12px;
+      margin: 15px 0 5px 0;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .folder-group-header .folder-path {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-left: 10px;
+    }
+
     .btn-primary {
       background: var(--primary-accent);
       border: none;
@@ -1360,7 +1360,7 @@ def home():
     <!-- Search Input -->
     <div class="search-container">
       <span class="search-icon">🔍</span>
-      <input type="text" class="search-input" id="search-input" placeholder="Type to search song titles or slide contents..." oninput="onSearchInput()" autofocus>
+      <input type="text" class="search-input" id="search-input" placeholder="Type to search song titles or slide contents..." autofocus>
     </div>
 
     <!-- Progress Banner -->
@@ -1506,8 +1506,7 @@ def home():
     }
 
     function onSearchInput() {
-      clearTimeout(searchDebounceTimeout);
-      searchDebounceTimeout = setTimeout(performSearch, 200);
+      // Deprecated in favor of the keydown listener, but kept as a fallback empty handler
     }
 
     async function performSearch() {
@@ -1537,126 +1536,146 @@ def home():
         return;
       }
 
-      // 1. Perform Local Search
-      try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        const results = await res.json();
+      // Parallelize local and web search fetches
+      
+      // 1. Local Search Execution
+      const localSearchPromise = (async () => {
+        try {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          const results = data.results;
+          const isNumeric = data.is_numeric;
 
-        if (results.length === 0) {
-          localCount.innerText = "No matches found";
-          localResultsList.innerHTML = `
-            <div class="empty-state">
-              <div class="icon">ℹ️</div>
-              <h4>No matches found</h4>
-              <p>Try refining your query or click 'Reindex'</p>
-            </div>
-          `;
-        } else {
-          localCount.innerText = `Top ${results.length} results`;
-          localResultsList.innerHTML = '';
-
-          results.forEach((item, index) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.id = `local-card-${index}`;
-            
-            card.onclick = () => {
-              const prev = document.querySelector('.card.selected');
-              if (prev) prev.classList.remove('selected');
-              selectedResultIndex = index;
-              card.classList.add('selected');
-            };
-
-            const isPptx = item.name.toLowerCase().endsWith('.pptx');
-            const fileIcon = isPptx ? '📊' : '📄';
-            let snippetHtml = item.snippet ? `<div class="card-snippet">${item.snippet}</div>` : '';
-
-            card.innerHTML = `
-              <div class="card-info">
-                <div class="card-title-row">
-                  <span class="card-icon">${fileIcon}</span>
-                  <span class="card-title" title="${item.title}">${item.title}</span>
-                </div>
-                <div class="card-path" title="${item.path}">${item.path}</div>
-                ${snippetHtml}
-              </div>
-              <div class="card-actions">
-                <button class="action-btn btn-primary" onclick="event.stopPropagation(); openFile('${encodeURIComponent(item.path)}')">▶ Open</button>
+          if (results.length === 0) {
+            localCount.innerText = "No matches found";
+            localResultsList.innerHTML = `
+              <div class="empty-state">
+                <div class="icon">ℹ️</div>
+                <h4>No matches found</h4>
+                <p>Try refining your query or click 'Reindex'</p>
               </div>
             `;
-            localResultsList.appendChild(card);
-          });
+          } else {
+            localCount.innerText = `Top ${results.length} results`;
+            localResultsList.innerHTML = '';
 
-          // Auto-select first local result
-          const cards = document.querySelectorAll('#local-results-list .card');
-          if (cards.length > 0) {
-            selectedResultIndex = 0;
-            cards[0].classList.add('selected');
+            let lastFolder = null;
+            results.forEach((item, index) => {
+              // Group headers for numeric searches
+              if (isNumeric && item.folder !== lastFolder) {
+                const header = document.createElement('div');
+                header.className = 'folder-group-header';
+                const folderName = item.folder.split(/[\\/]/).pop();
+                header.innerHTML = `<span>📁 ${folderName}</span>`;
+                localResultsList.appendChild(header);
+                lastFolder = item.folder;
+              }
+
+              const card = document.createElement('div');
+              card.className = 'card';
+              card.id = `local-card-${index}`;
+              
+              card.onclick = () => {
+                const prev = document.querySelector('.card.selected');
+                if (prev) prev.classList.remove('selected');
+                selectedResultIndex = index;
+                card.classList.add('selected');
+              };
+
+              const isPptx = item.name.toLowerCase().endsWith('.pptx');
+              const fileIcon = isPptx ? '📊' : '📄';
+              let snippetHtml = item.snippet ? `<div class="card-snippet">${item.snippet}</div>` : '';
+
+              card.innerHTML = `
+                <div class="card-info">
+                  <div class="card-title-row">
+                    <span class="card-icon">${fileIcon}</span>
+                    <span class="card-title" title="${item.title}">${item.title}</span>
+                  </div>
+                  <div class="card-path" title="${item.path}">${item.path}</div>
+                  ${snippetHtml}
+                </div>
+                <div class="card-actions">
+                  <button class="action-btn btn-primary" onclick="event.stopPropagation(); openFile('${encodeURIComponent(item.path)}')">▶ Open</button>
+                </div>
+              `;
+              localResultsList.appendChild(card);
+            });
+
+            // Auto-select first local result
+            const cards = document.querySelectorAll('#local-results-list .card');
+            if (cards.length > 0) {
+              selectedResultIndex = 0;
+              cards[0].classList.add('selected');
+            }
           }
+        } catch (err) {
+          console.error("Local search failed:", err);
+          localCount.innerText = "Local search failed";
         }
-      } catch (err) {
-        console.error("Local search failed:", err);
-      }
+      })();
 
-      // 2. Perform Web Search (Resurse Crestine)
-      webCount.innerText = "Searching web...";
-      webResultsList.innerHTML = `
-        <div class="empty-state">
-          <div class="icon">⏳</div>
-          <h4>Searching...</h4>
-          <p>Querying resursecrestine.ro web API</p>
-        </div>
-      `;
-
-      try {
-        const res = await fetch(`/api/search/web?q=${encodeURIComponent(query)}`);
-        const results = await res.json();
-
-        if (results.length === 0) {
-          webCount.innerText = "No web matches";
-          webResultsList.innerHTML = `
-            <div class="empty-state">
-              <div class="icon">ℹ️</div>
-              <h4>No matches found on web</h4>
-              <p>Check spelling or search local database</p>
-            </div>
-          `;
-        } else {
-          webCount.innerText = `Found ${results.length} songs`;
-          webResultsList.innerHTML = '';
-
-          results.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            
-            card.innerHTML = `
-              <div class="card-info">
-                <div class="card-title-row">
-                  <span class="card-icon">🎵</span>
-                  <span class="card-title" title="${item.title}">${item.title}</span>
-                </div>
-                <div class="card-author-line">de ${item.author || 'Anonim'}</div>
-                <div class="card-path" title="Link">${item.url}</div>
-              </div>
-              <div class="card-actions">
-                <button class="action-btn btn-success" onclick="projectWeb('${item.id}', '${item.slug}', '${item.title_slug}', '${encodeURIComponent(item.title)}')">📺 Project</button>
-                <button class="action-btn btn-secondary" onclick="window.open('${item.url}', '_blank')">🔗 Web</button>
-              </div>
-            `;
-            webResultsList.appendChild(card);
-          });
-        }
-      } catch (err) {
-        webCount.innerText = "Web query failed";
+      // 2. Web Search Execution
+      const webSearchPromise = (async () => {
+        webCount.innerText = "Searching web...";
         webResultsList.innerHTML = `
           <div class="empty-state">
-            <div class="icon">⚠️</div>
-            <h4>Search failed</h4>
-            <p>Could not connect to Resurse Creștine API</p>
+            <div class="icon">⏳</div>
+            <h4>Searching...</h4>
+            <p>Querying resursecrestine.ro web API</p>
           </div>
         `;
-        console.error("Web search failed:", err);
-      }
+
+        try {
+          const res = await fetch(`/api/search/web?q=${encodeURIComponent(query)}`);
+          const results = await res.json();
+
+          if (results.length === 0) {
+            webCount.innerText = "No web matches";
+            webResultsList.innerHTML = `
+              <div class="empty-state">
+                <div class="icon">ℹ️</div>
+                <h4>No matches found on web</h4>
+                <p>Check spelling or search local database</p>
+              </div>
+            `;
+          } else {
+            webCount.innerText = `Found ${results.length} songs`;
+            webResultsList.innerHTML = '';
+
+            results.forEach(item => {
+              const card = document.createElement('div');
+              card.className = 'card';
+              
+              card.innerHTML = `
+                <div class="card-info">
+                  <div class="card-title-row">
+                    <span class="card-icon">🎵</span>
+                    <span class="card-title" title="${item.title}">${item.title}</span>
+                  </div>
+                  <div class="card-author-line">de ${item.author || 'Anonim'}</div>
+                  <div class="card-path" title="Link">${item.url}</div>
+                </div>
+                <div class="card-actions">
+                  <button class="action-btn btn-success" onclick="projectWeb('${item.id}', '${item.slug}', '${item.title_slug}', '${encodeURIComponent(item.title)}')">📺 Project</button>
+                  <button class="action-btn btn-secondary" onclick="window.open('${item.url}', '_blank')">🔗 Web</button>
+                </div>
+              `;
+              webResultsList.appendChild(card);
+            });
+          }
+        } catch (err) {
+          webCount.innerText = "Web query failed";
+          webResultsList.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">⚠️</div>
+              <h4>Search failed</h4>
+              <p>Could not connect to Resurse Creștine API</p>
+            </div>
+          `;
+          console.error("Web search failed:", err);
+        }
+      })();
     }
 
     async function openFile(encodedPath) {
@@ -1855,6 +1874,31 @@ def home():
         console.error("Status polling failed:", err);
       }
     }
+
+    // Set up search-input key listeners
+    window.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) {
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            if (selectedResultIndex === -1) {
+              e.preventDefault();
+              clearTimeout(searchDebounceTimeout);
+              performSearch();
+            }
+          } else if (e.key === ' ') {
+            clearTimeout(searchDebounceTimeout);
+            searchDebounceTimeout = setTimeout(performSearch, 50);
+          }
+        });
+        searchInput.addEventListener('input', (e) => {
+          if (!searchInput.value.trim()) {
+            clearTimeout(searchDebounceTimeout);
+            performSearch();
+          }
+        });
+      }
+    });
 
     // --- GLOBAL KEYBOARD NAVIGATOR ---
 
@@ -2073,25 +2117,30 @@ def reindex_api():
 def search_api():
     query = request.args.get('q', '').strip()
     if not query:
-        return jsonify([])
+        return jsonify({"results": [], "is_numeric": False})
         
     norm_query = normalize_text(query)
     q_words = norm_query.split()
     if not q_words:
-        return jsonify([])
+        return jsonify({"results": [], "is_numeric": False})
+        
+    is_numeric = False
+    clean_q = re.sub(r'[\s\-_,.]', '', query)
+    if clean_q and clean_q.isdigit():
+        is_numeric = True
         
     results = []
     with index_lock:
         for file_path, doc in index_data.items():
-            score = 0
+            title_score = 0
             
             # 1. Potriviri complete de titlu (Prioritate mare)
             if norm_query == doc["norm_title"]:
-                score += 1000
+                title_score += 1000
             elif doc["norm_title"].startswith(norm_query):
-                score += 500
+                title_score += 500
             elif norm_query in doc["norm_title"]:
-                score += 250
+                title_score += 250
             else:
                 # Potrivire titlu cuvânt cu cuvânt (cu suport fuzzy)
                 t_words = title_words_cache.get(file_path, [])
@@ -2105,45 +2154,62 @@ def search_api():
                                 matched_title_words += 0.5
                                 break
                 if matched_title_words > 0:
-                    score += 100 * (matched_title_words / len(q_words))
+                    title_score += 100 * (matched_title_words / len(q_words))
                     
-            # 2. Potriviri de conținut (Prioritate mai mică, cu suport fuzzy)
-            if doc["norm_content"]:
-                if norm_query in doc["norm_content"]:
-                    score += 150 + (10 * doc["norm_content"].count(norm_query))
-                else:
-                    # Potrivire conținut cuvânt cu cuvânt (cu suport fuzzy)
-                    c_words = words_cache.get(file_path, set())
-                    matched_content_words = 0
-                    for qw in q_words:
-                        if qw in c_words:
-                            matched_content_words += 1.0
-                            score += min(doc["norm_content"].count(qw), 10) * 2
-                        else:
-                            for cw in c_words:
-                                if is_fuzzy_match(qw, cw):
-                                    matched_content_words += 0.5
-                                    break
-                    if matched_content_words > 0:
-                        score += 50 * (matched_content_words / len(q_words))
-                        
+            # Dacă se caută un număr, ignoră complet contextul (dacă titlul nu se potrivește, se sare peste fișier)
+            if is_numeric and title_score == 0:
+                continue
+                
+            content_score = 0
+            if not is_numeric:
+                # 2. Potriviri de conținut (Prioritate mai mică, cu suport fuzzy)
+                if doc.get("norm_content"):
+                    if norm_query in doc["norm_content"]:
+                        content_score += 150 + (10 * doc["norm_content"].count(norm_query))
+                    else:
+                        # Potrivire conținut cuvânt cu cuvânt (cu suport fuzzy)
+                        c_words = words_cache.get(file_path, set())
+                        matched_content_words = 0
+                        for qw in q_words:
+                            if qw in c_words:
+                                matched_content_words += 1.0
+                                content_score += min(doc["norm_content"].count(qw), 10) * 2
+                            else:
+                                for cw in c_words:
+                                    if is_fuzzy_match(qw, cw):
+                                        matched_content_words += 0.5
+                                        break
+                        if matched_content_words > 0:
+                            content_score += 50 * (matched_content_words / len(q_words))
+                            
+            score = title_score + content_score
             if score > 0:
                 results.append({
                     "path": doc["path"],
                     "name": doc["name"],
                     "title": doc["title"],
-                    "raw_content": doc["content"],
+                    "raw_content": doc.get("content", ""),
+                    "title_score": title_score,
+                    "content_score": content_score,
                     "score": score
                 })
                 
-    results.sort(key=lambda x: x["score"], reverse=True)
-    top_5 = results[:5]
+    # Sortare rezultate: Cele care au potrivire în titlu vin primele, apoi restul (după scor descrescător)
+    results.sort(key=lambda x: (0 if x["title_score"] > 0 else 1, -x["score"]))
     
-    for item in top_5:
+    limit = 20 if is_numeric else 5
+    top_results = results[:limit]
+    
+    for item in top_results:
         item["snippet"] = get_highlighted_snippet(item["raw_content"], query)
         del item["raw_content"]
+        item["folder"] = os.path.dirname(item["path"])
         
-    return jsonify(top_5)
+    if is_numeric:
+        # Grupăm după folder, iar în interior sortăm după titlu descrescător
+        top_results.sort(key=lambda x: (x["folder"], -x["title_score"]))
+        
+    return jsonify({"results": top_results, "is_numeric": is_numeric})
 
 # --- API CĂUTARE ȘI EXTRAGERE WEB (Resurse Creștine) ---
 
