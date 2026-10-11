@@ -1,0 +1,4 @@
+Flask>=3.1,<4
+python-pptx>=1.0,<2
+pywebview>=5,<7
+pywin32>=308; sys_platform == 'win32'

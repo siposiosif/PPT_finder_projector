@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Transcriere live în limba română, procesată local pe placa video NVIDIA."
+    />
+    <title>Transcriere RO Live</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Transcriere RO Live">
+          <span class="brand-mark" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
+          </span>
+          <span>RO <b>//</b> LIVE</span>
+        </a>
+        <div class="system-state" id="system-state">
+          <span class="state-dot"></span>
+          <span id="system-state-text">Se verifică sistemul…</span>
+        </div>
+      </header>
+
+      <main>
+        <section class="intro-row" aria-labelledby="page-title">
+          <div>
+            <p class="eyebrow">RECUNOAȘTERE VOCALĂ LOCALĂ</p>
+            <h1 id="page-title">Vorbește. Găsește versetul.</h1>
+          </div>
+          <div class="controls">
+            <button class="secondary-button" id="clear-button" type="button">Șterge textul</button>
+            <button class="record-button" id="record-button" type="button" disabled>
+              <span class="record-icon" aria-hidden="true"></span>
+              <span id="record-label">Pornește microfonul</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="model-manager" aria-labelledby="model-manager-title">
+          <div class="model-manager-copy">
+            <span class="source-index">MODEL</span>
+            <div>
+              <strong id="model-manager-title">Model vocal</strong>
+              <span>Alege modelul ASR folosit la următoarea pornire a aplicației vocale.</span>
+            </div>
+          </div>
+          <div class="model-manager-actions">
+            <label class="sr-only" for="model-select">Model vocal</label>
+            <select id="model-select" disabled></select>
+            <button class="secondary-button compact-button" id="model-apply-button" type="button" disabled>Folosește modelul</button>
+          </div>
+          <form class="model-install-form" id="model-install-form">
+            <label class="sr-only" for="model-install-input">Model Hugging Face sau folder local</label>
+            <input
+              id="model-install-input"
+              type="text"
+              placeholder="Hugging Face ID sau cale folder local"
+              autocomplete="off"
+            />
+            <button type="submit">Instalează / adaugă</button>
+          </form>
+          <p class="model-manager-status" id="model-manager-status">
+            Schimbarea modelului se aplică după repornirea aplicației vocale.
+          </p>
+        </section>
+
+        <section class="test-source" aria-labelledby="test-source-title">
+          <div class="test-source-copy">
+            <span class="source-index">TEST</span>
+            <div>
+              <strong id="test-source-title">Testează cu un eșantion</strong>
+              <span>Aplicație vocală independentă. Microfonul pornește numai la cerere.</span>
+            </div>
+          </div>
+          <div class="test-source-actions">
+            <label class="file-button" for="audio-file">
+              <input id="audio-file" type="file" accept="audio/*,video/*" />
+              Alege un fișier
+            </label>
+            <form class="youtube-form" id="youtube-form">
+              <label class="sr-only" for="youtube-url">Link YouTube</label>
+              <input
+                id="youtube-url"
+                type="url"
+                inputmode="url"
+                placeholder="Lipește linkul YouTube"
+                autocomplete="url"
+              />
+              <button type="submit">Transcrie</button>
+            </form>
+          </div>
+          <div class="sample-player" id="sample-player" hidden>
+            <div class="sample-player-copy">
+              <span>REDARE EȘANTION</span>
+              <strong id="sample-player-name">Fișier audio</strong>
+            </div>
+            <audio id="audio-playback" controls preload="metadata"></audio>
+          </div>
+          <div class="playback-analysis" id="playback-analysis">
+            <span class="analysis-pulse" aria-hidden="true"></span>
+            <span id="playback-analysis-label">GPU / SEGMENTE PE TĂCERE</span>
+            <label class="chunk-control" for="playback-seconds">
+              <span>Maxim:</span>
+              <input id="playback-seconds" type="range" min="2" max="15" step="1" value="10" />
+              <output id="playback-seconds-value" for="playback-seconds">10 s</output>
+            </label>
+            <label class="chunk-control" for="playback-silence">
+              <span>Pauză:</span>
+              <input id="playback-silence" type="range" min="0.10" max="1.00" step="0.05" value="0.30" />
+              <output id="playback-silence-value" for="playback-silence">0.30 s</output>
+            </label>
+            <label class="chunk-control" for="playback-threshold">
+              <span>Prag:</span>
+              <input id="playback-threshold" type="range" min="0.001" max="0.030" step="0.001" value="0.005" />
+              <output id="playback-threshold-value" for="playback-threshold">0.005</output>
+            </label>
+            <span class="level-meter" aria-label="Nivel audio redare">
+              <span>Nivel:</span>
+              <meter id="playback-level" min="0" max="0.05" low="0.005" optimum="0.02" value="0"></meter>
+              <output id="playback-level-value">0.000</output>
+            </span>
+            <strong id="playback-analysis-status">Alege un fișier sau lipește un link YouTube, apoi apasă redare pentru analiză.</strong>
+          </div>
+        </section>
+
+        <section class="workspace">
+          <article class="transcript-panel">
+            <div class="signal-strip">
+              <canvas id="waveform" aria-label="Nivel audio în timp real"></canvas>
+              <div class="listening-label" id="listening-label">MICROFON OPRIT</div>
+            </div>
+
+            <div class="transcript-scroll" id="transcript-scroll">
+              <div class="empty-state" id="empty-state">
+                <span class="empty-number">01</span>
+                <p>Apasă „Pornește microfonul”, apoi vorbește în limba română.</p>
+                <small>Primele 1,2 secunde sunt folosite pentru calibrarea zgomotului.</small>
+              </div>
+              <div
+                class="final-transcript"
+                id="final-transcript"
+                aria-live="polite"
+                aria-label="Text transcris"
+              ></div>
+              <p class="partial-transcript" id="partial-transcript" aria-live="polite"></p>
+            </div>
+          </article>
+
+          <aside class="metrics-panel" aria-label="Starea transcrierii">
+            <div class="status-block">
+              <span class="metric-label">STARE</span>
+              <strong class="large-status" id="large-status">În așteptare</strong>
+              <p id="status-detail">Modelul se încarcă pe placa video.</p>
+            </div>
+
+            <dl class="metric-grid">
+              <div>
+                <dt>GPU</dt>
+                <dd id="gpu-value">—</dd>
+              </div>
+              <div>
+                <dt>LATENȚĂ</dt>
+                <dd id="latency-value">—</dd>
+              </div>
+              <div>
+                <dt>RTF</dt>
+                <dd id="rtf-value">—</dd>
+              </div>
+              <div>
+                <dt>SESIUNE</dt>
+                <dd id="session-value">00:00</dd>
+              </div>
+            </dl>
+
+            <section class="bible-panel" aria-labelledby="bible-title">
+              <div class="bible-heading">
+                <div>
+                  <span class="metric-label">BIBLIA CORNILESCU</span>
+                  <strong id="bible-title">Potriviri biblice</strong>
+                </div>
+                <span class="match-count" id="match-count">0</span>
+              </div>
+              <div class="bible-results" id="bible-results" aria-live="polite">
+                <p id="bible-empty">Versetele găsite vor apărea aici.</p>
+              </div>
+              <a class="source-link" href="https://biblia.resursecrestine.ro" target="_blank" rel="noreferrer">
+                Resurse Creștine
+              </a>
+            </section>
+
+            <div class="privacy-note">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 10V8a5 5 0 0 1 10 0v2m-9 0h8a2 2 0 0 1 2 2v7H6v-7a2 2 0 0 1 2-2Z" />
+              </svg>
+              <div>
+                <strong>Audio procesat local</strong>
+                <span>Vocea rămâne pe acest calculator. Fragmentele de text sunt trimise la Resurse Creștine pentru căutarea versetelor.</span>
+              </div>
+            </div>
+          </aside>
+        </section>
+      </main>
+
+      <footer>
+        <span id="model-value">nvidia/parakeet-tdt-0.6b-v3</span>
+        <span>16 kHz · FP16 · CUDA</span>
+      </footer>
+    </div>
+
+    <script src="/i18n.js?v=4" defer></script>
+    <script src="/app.js?v=14" defer></script>
+  </body>
+</html>

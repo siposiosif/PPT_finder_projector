@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="{{ ui_language }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ecran Proiecție - PPT Finder</title>
+  <link rel="stylesheet" href="/static/css/projector.css?v=20261009-2">
+</head>
+<body data-access-code="{{ access_code }}" data-language="{{ ui_language }}">
+  <div class="controls">
+    <span id="projector-status">Conectare…</span>
+    <button type="button" id="previous-projector-btn">← Înapoi</button>
+    <button type="button" id="next-projector-btn">Înainte →</button>
+    <button type="button" id="fullscreen-btn">Ecran complet · F</button>
+  </div>
+  <div class="slide-container" id="slide-container"><div class="slide-text" id="slide-text"></div></div>
+  <div class="slide-label" id="slide-label"></div>
+  <script src="/static/js/i18n.js?v=20261009-1"></script>
+  <script src="/static/js/projector.js?v=20261009-3"></script>
+</body>
+</html>

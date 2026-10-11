@@ -1,0 +1,2775 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PPT Finder - Căutare rapidă și proiecție pentru biserici | Fast presentation projection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #07070c;
+      --bg-panel: #0d0d16;
+      --bg-card: #131322;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(0, 229, 255, 0.3);
+      --primary: #00e5ff;
+      --primary-glow: rgba(0, 229, 255, 0.15);
+      --secondary: #6366f1;
+      --gradient-accent: linear-gradient(135deg, var(--primary), var(--secondary));
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dark: #6b7280;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    /* Bilingual display rules */
+    [data-lang="en"] { display: none !important; }
+    html[lang="en"] [data-lang="en"] { display: block !important; }
+    html[lang="en"] [data-lang="ro"] { display: none !important; }
+
+    /* Inline elements visibility */
+    html[lang="en"] span[data-lang="en"],
+    html[lang="en"] strong[data-lang="en"],
+    html[lang="en"] a[data-lang="en"] {
+      display: inline !important;
+    }
+    
+    * {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 45%),
+        radial-gradient(at 100% 100%, rgba(0, 229, 255, 0.06) 0px, transparent 45%);
+      background-attachment: fixed;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navbar styling */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      backdrop-filter: blur(16px);
+      background-color: rgba(7, 7, 12, 0.7);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      font-size: 24px;
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+      font-family: var(--font-title);
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+      font-family: var(--font-title);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: var(--primary);
+    }
+
+    /* Language Switcher Button */
+    .lang-switcher {
+      display: flex;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .lang-btn.active {
+      background: var(--primary);
+      color: #000;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 160px 0 60px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .badge-network {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 99px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #818cf8;
+      margin-bottom: 25px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-family: var(--font-title);
+      font-size: 54px;
+      font-weight: 900;
+      line-height: 1.15;
+      margin: 0 0 20px 0;
+      letter-spacing: -1.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero h1 span {
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 700px;
+      margin: 0 auto 35px auto;
+      font-size: 18px;
+      color: var(--text-muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--gradient-accent);
+      color: #000;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      box-shadow: 0 8px 20px rgba(0, 229, 255, 0.25);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 15px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--text-muted);
+    }
+
+    .experimental-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .experimental-toggle input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .toggle-track {
+      width: 42px;
+      height: 24px;
+      padding: 3px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+
+    .toggle-track::after {
+      content: '';
+      display: block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .experimental-toggle input:checked + .toggle-track {
+      background: rgba(0, 229, 255, 0.18);
+      border-color: var(--primary);
+    }
+
+    .experimental-toggle input:checked + .toggle-track::after {
+      transform: translateX(18px);
+      background: var(--primary);
+    }
+
+    .experimental-toggle input:focus-visible + .toggle-track {
+      outline: 2px solid var(--primary);
+      outline-offset: 3px;
+    }
+
+    /* Simulator / Mockup section */
+    .simulator-section {
+      padding: 60px 0;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 45px;
+    }
+
+    .section-title h2 {
+      font-family: var(--font-title);
+      font-size: 36px;
+      font-weight: 800;
+      margin: 0 0 10px 0;
+      letter-spacing: -1px;
+    }
+
+    .section-title p {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .sim-container {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 968px) {
+      .sim-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sim-panel {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      height: 520px;
+      overflow: hidden;
+    }
+
+    .sim-header {
+      background: #11111a;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .win-buttons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .win-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .win-dot.close { background: #ff5f56; }
+    .win-dot.min { background: #ffbd2e; }
+    .win-dot.max { background: #27c93f; }
+
+    .sim-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-family: var(--font-title);
+      letter-spacing: 0.5px;
+    }
+
+    .sim-search-bar {
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+    }
+
+    .sim-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 15px;
+      color: var(--text-main);
+      font-size: 13px;
+    }
+
+    .sim-results {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sim-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sim-card.active, .sim-card:hover {
+      border-color: var(--primary);
+      background: rgba(0, 229, 255, 0.03);
+    }
+
+    .sim-card-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .sim-card-path {
+      font-size: 10px;
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-family: monospace;
+    }
+
+    .sim-card-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.2);
+      padding: 8px;
+      border-radius: 6px;
+    }
+
+    .sim-projector-view {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .proj-screen {
+      background: #000;
+      border: 6px solid #1c1c28;
+      border-radius: 12px;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .proj-instructions {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    /* How It Works Grid */
+    .how-it-works {
+      padding: 60px 0;
+      background: rgba(255, 255, 255, 0.01);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .step-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px 25px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .step-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--border-hover);
+    }
+
+    .step-icon {
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
+
+    .step-card h3 {
+      font-family: var(--font-title);
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+    }
+
+    .step-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Features Section */
+    .features {
+      padding: 60px 0;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px;
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 10px 25px rgba(0, 229, 255, 0.04);
+    }
+
+    .feat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: rgba(0, 229, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-family: var(--font-title);
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Installation Guide Tabs */
+    .guide-section {
+      padding: 60px 0;
+      background: rgba(255, 255, 255, 0.01);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .guide-wrapper {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 40px;
+    }
+
+    @media (max-width: 850px) {
+      .guide-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tabs-header {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 25px;
+    }
+
+    .tab-pill {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-pill.active {
+      background: rgba(99, 102, 241, 0.08);
+      border-color: var(--secondary);
+      color: var(--text-main);
+    }
+
+    .tab-body {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      min-height: 250px;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-content h3 {
+      font-family: var(--font-title);
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+    }
+
+    .tab-content p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0 0 15px 0;
+    }
+
+    .code-block {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #818cf8;
+      overflow-x: auto;
+      margin: 0 0 15px 0;
+    }
+
+    /* FAQ section */
+    .faq-section {
+      padding: 60px 0;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .faq-list {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .faq-item {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .faq-question {
+      padding: 20px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .faq-question svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-muted);
+      transition: transform 0.3s ease;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .faq-answer-content {
+      padding: 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .faq-item.active {
+      border-color: var(--border-hover);
+    }
+
+    .faq-item.active .faq-question svg {
+      transform: rotate(180deg);
+      color: var(--primary);
+    }
+
+    .faq-item.active .faq-answer {
+      border-top: 1px solid var(--border-color);
+    }
+
+    footer {
+      background: #040408;
+      border-top: 1px solid var(--border-color);
+      padding: 40px 0;
+      text-align: center;
+      margin-top: 80px;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    footer .footer-logo {
+      margin-bottom: 15px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    footer .footer-logo span {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* Responsive layout: keep the navigation and dense controls usable on touch screens. */
+    @media (max-width: 900px) {
+      .nav-container {
+        height: auto;
+        min-height: 70px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        flex-wrap: wrap;
+        gap: 10px 20px;
+      }
+
+      nav {
+        order: 3;
+        width: 100%;
+        gap: 20px;
+        padding-bottom: 2px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      nav::-webkit-scrollbar { display: none; }
+
+      nav a { white-space: nowrap; }
+
+      .hero { padding-top: 190px; }
+      .simulator-section, .how-it-works, .features, .guide-section, .faq-section { padding: 48px 0; }
+      .guide-wrapper { gap: 28px; }
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 0 16px; }
+      .nav-container { gap: 8px 12px; }
+      .logo-text { font-size: 18px; }
+      nav { gap: 16px; }
+      nav a { font-size: 13px; }
+      .lang-btn { min-height: 34px; padding: 5px 10px; }
+
+      .hero { padding: 174px 0 42px; }
+      .badge-network { margin-bottom: 18px; }
+      .hero h1 { font-size: clamp(32px, 10vw, 42px); letter-spacing: -1px; }
+      .hero p { font-size: 16px; margin-bottom: 28px; }
+      .hero-actions { gap: 12px; }
+      .hero-actions a { width: 100%; justify-content: center; }
+
+      .section-title { margin-bottom: 30px; }
+      .section-title h2 { font-size: 29px; }
+      .sim-container { padding: 12px; border-radius: 14px; gap: 20px; }
+      .sim-panel { height: 480px !important; }
+      .sim-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .proj-screen { font-size: 15px; padding: 14px; }
+      .proj-instructions, .tab-body { padding: 20px; }
+      .tabs-header { overflow-x: auto; padding-bottom: 12px; }
+      .tab-pill { flex: 0 0 auto; min-height: 40px; }
+      .step-card, .feature-card { padding: 24px 20px; }
+      .faq-question, .faq-answer-content { padding: 16px; }
+      footer { margin-top: 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container nav-container">
+      <a href="#" class="logo">
+        <span class="logo-icon">▲</span>
+        <span class="logo-text">PPT Finder</span>
+      </a>
+      <nav>
+        <a href="#simulator" data-lang="ro">Simulator</a>
+        <a href="#simulator" data-lang="en">Simulator</a>
+        <a href="#cum-functioneaza" data-lang="ro">Cum funcționează</a>
+        <a href="#cum-functioneaza" data-lang="en">How it works</a>
+        <a href="#functii" data-lang="ro">Funcții</a>
+        <a href="#functii" data-lang="en">Features</a>
+        <a href="#remote" data-lang="ro">Telecomandă</a>
+        <a href="#remote" data-lang="en">Remote</a>
+        <a href="#ghid" data-lang="ro">Instalare</a>
+        <a href="#ghid" data-lang="en">Install</a>
+        
+        <!-- Language Switcher Pill -->
+        <div class="lang-switcher">
+          <button class="lang-btn active" data-lang-btn="ro" onclick="setLanguage('ro')">RO</button>
+          <button class="lang-btn" data-lang-btn="en" onclick="setLanguage('en')">EN</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="badge-network">
+        <span class="pulse-dot"></span>
+        <span data-lang="ro">Sincronizare rețea activă</span>
+        <span data-lang="en">Active network synchronization</span>
+      </div>
+      
+      <h1 data-lang="ro">Căutare rapidă și proiecție instantanee pentru <span>prezentări și cântece</span></h1>
+      <h1 data-lang="en">Fast search and instant projection for <span>presentations & lyrics</span></h1>
+      
+      <p data-lang="ro">O aplicație hibridă pentru biserici: caută prezentări locale, proiectează versuri din Resurse Creștine și oferă o telecomandă de telefon pentru prezentarea sau proiecția activă.</p>
+      <p data-lang="en">A hybrid app for churches: search local presentations, project lyrics from Resurse Creștine, and use a phone remote for the active presentation or web projection.</p>
+
+      <div class="hero-actions">
+        <a id="finder-download" href="https://github.com/siposiosif/PPT_finder_projector/releases/download/1.0.1/PPT_Finder.exe" data-github-href="https://github.com/siposiosif/PPT_finder_projector/releases/download/1.0.1/PPT_Finder.exe" data-hosted-href="dist/PPT_Finder.exe" class="btn-secondary">
+          <span>⬇</span>
+          <span data-lang="ro">Descarcă PPT Finder (.exe)</span>
+          <span data-lang="en">Download PPT Finder (.exe)</span>
+        </a>
+        <a id="server-download" href="https://github.com/siposiosif/PPT_finder_projector/releases/download/1.0.1/PPT_Server.exe" data-github-href="https://github.com/siposiosif/PPT_finder_projector/releases/download/1.0.1/PPT_Server.exe" data-hosted-href="dist/PPT_Server.exe" class="btn-secondary">
+          <span>⬇</span>
+          <span data-lang="ro">Descarcă PPT Server (.exe)</span>
+          <span data-lang="en">Download PPT Server (.exe)</span>
+        </a>
+        <a href="https://github.com/siposiosif/PPT_finder_projector" target="_blank" rel="noopener" class="btn-primary">
+          <span>⌘</span>
+          <span data-lang="ro">Cod sursă pe GitHub</span>
+          <span data-lang="en">Source code on GitHub</span>
+        </a>
+        <a href="#simulator" class="btn-secondary">
+          <span data-lang="ro">Vezi Simulatorul</span>
+          <span data-lang="en">View Simulator</span>
+        </a>
+      </div>
+      <label class="experimental-toggle">
+        <input id="experimental-download-toggle" type="checkbox" aria-label="Use experimental hosted downloads">
+        <span class="toggle-track" aria-hidden="true"></span>
+        <span data-lang="ro">Build experimental găzduit pe acest site</span>
+        <span data-lang="en">Experimental build hosted on this site</span>
+      </label>
+    </div>
+  </section>
+
+  <!-- Interactive Live Simulator Section -->
+  <section class="simulator-section" id="simulator">
+    <div class="container">
+      <div class="section-title">
+        <h2 data-lang="ro">Consolă de Control Interactivă</h2>
+        <h2 data-lang="en">Interactive Control Console</h2>
+        <p data-lang="ro">Experimentează cum funcționează aplicația reală. Tastează o căutare și apasă pe o strofă pentru a o proiecta pe ecranul secundar.</p>
+        <p data-lang="en">Experience how the real application functions. Type a search query and click on a stanza to project it onto the screen.</p>
+      </div>
+
+      <div class="sim-container" style="grid-template-columns: 1.6fr 1fr;">
+        <!-- Controller Window Simulation -->
+        <div class="sim-panel" style="height: 600px;">
+          <div class="sim-header">
+            <div class="win-buttons">
+              <span class="win-dot close"></span>
+              <span class="win-dot min"></span>
+              <span class="win-dot max"></span>
+            </div>
+            <span class="sim-title">PPT Finder - Dashboard (Real UI Simulator)</span>
+          </div>
+          <iframe id="simulator-iframe" style="width:100%; height:100%; border:none; background:#0b0b0f;"></iframe>
+        </div>
+
+        <!-- Projector View Simulation -->
+        <div class="sim-projector-view">
+          <div class="proj-screen" id="simProjectorScreen">
+            <span data-lang="ro">Ecran Proiector<br><span style="font-size:12px;color:var(--text-muted)">Selectează o strofă din simulatorul din stânga pentru a proiecta</span></span>
+            <span data-lang="en">Projector Screen<br><span style="font-size:12px;color:var(--text-muted)">Select a stanza from the left simulator to project</span></span>
+          </div>
+          
+          <div class="proj-instructions">
+            <h4 style="margin:0 0 8px 0;font-size:14px;color:var(--primary)" data-lang="ro">📱 Control mobil din rețea</h4>
+            <h4 style="margin:0 0 8px 0;font-size:14px;color:var(--primary)" data-lang="en">📱 Wireless Mobile Control</h4>
+            
+            <p style="margin:0;font-size:12px;color:var(--text-muted);line-height:1.4" data-lang="ro">
+              În versiunea reală, serverul local expune panoul de control pe Wi-Fi. Operatorul scanează codul QR cu telefonul/tableta pentru a schimba slide-urile de la distanță.
+            </p>
+            <p style="margin:0;font-size:12px;color:var(--text-muted);line-height:1.4" data-lang="en">
+              In the real version, the local server hosts the control panel over local Wi-Fi. The operator scans the QR code with a phone/tablet to control projection remotely.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works" id="cum-functioneaza">
+    <div class="container">
+      <div class="section-title">
+        <h2 data-lang="ro">Cum Funcționează Aplicația</h2>
+        <h2 data-lang="en">How the Application Works</h2>
+        <p data-lang="ro">PPT Finder simplifică fluxul de lucru hibrid combinând stocarea locală cu serviciile web.</p>
+        <p data-lang="en">PPT Finder simplifies your hybrid workflow by linking local storage file system with web scraping engines.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-icon">📂</div>
+          <h3 data-lang="ro">1. Scanare & Indexare</h3>
+          <h3 data-lang="en">1. Directory Scanning</h3>
+          <p data-lang="ro">La pornire, citește folderele setate în <code>config.txt</code> și extrage automat textul din slide-urile <code>.pptx</code> utilizând biblioteca nativă Python.</p>
+          <p data-lang="en">On startup, it parses the folders defined in <code>config.txt</code>, extracting text slides from all <code>.pptx</code> files using python-pptx.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-icon">⚡</div>
+          <h3 data-lang="ro">2. Căutare Fuzzy Rapidă</h3>
+          <h3 data-lang="en">2. Instant Fuzzy Search</h3>
+          <p data-lang="ro">Căutările sunt normalizate prin eliminarea diacriticelor și a diferențelor de litere mari/mici, returnând potriviri perfecte în sub 5ms.</p>
+          <p data-lang="en">Search queries are normalized (ignoring diacritics and casing), matching and filtering slides in under 5 milliseconds.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-icon">🌐</div>
+          <h3 data-lang="ro">3. Integrare API Web</h3>
+          <h3 data-lang="en">3. Online Lyrics Scraping</h3>
+          <p data-lang="ro">Dacă un cântec nu este găsit în calculator, interoghează automat baza de date Resurse Creștine online, formatează textul și îl afișează instant.</p>
+          <p data-lang="en">If a song is missing locally, it fetches lyrics from the Resurse Creștine database, parses them into stanzas, and displays them.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-icon">🖥️</div>
+          <h3 data-lang="ro">4. Ecran Secundar & Mobil</h3>
+          <h3 data-lang="en">4. Dual Screen & Mobile</h3>
+          <p data-lang="ro">Ecranul secundar al proiectorului rulează ca un tab fullscreen în browser și face polling automat pentru a proiecta instantaneu slide-ul selectat.</p>
+          <p data-lang="en">The secondary screen runs as a browser window in fullscreen mode, polling the backend state to project slides instantly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Remote Modes Section -->
+  <section class="features" id="remote">
+    <div class="container">
+      <div class="section-title">
+        <h2 data-lang="ro">Telecomandă mobilă: ce controlează</h2>
+        <h2 data-lang="en">Mobile remote: what it controls</h2>
+        <p data-lang="ro">Pagina <code>/remote</code> controlează întotdeauna ultima sesiune selectată în PPT Finder.</p>
+        <p data-lang="en">The <code>/remote</code> page always controls the most recently selected session in PPT Finder.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feat-icon">📽️</div>
+          <h3 data-lang="ro">Prezentare PowerPoint gestionată</h3>
+          <h3 data-lang="en">Managed PowerPoint presentation</h3>
+          <p data-lang="ro">În rezultatele locale, apasă <strong>▶ Open</strong>. Serverul deschide fișierul într-o instanță PowerPoint gestionată; telecomanda vede același fișier, slide-urile și poziția curentă.</p>
+          <p data-lang="en">In local results, press <strong>▶ Open</strong>. The server opens the file in a managed PowerPoint instance; the remote sees that same deck, its slides, and its current position.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feat-icon">🎵</div>
+          <h3 data-lang="ro">Resurse Creștine și proiecția web</h3>
+          <h3 data-lang="en">Resurse Creștine and web projection</h3>
+          <p data-lang="ro">În rezultatele web, apasă <strong>📺 Project</strong>. Strofele și refrenele devin o sesiune comună: telecomanda poate selecta direct versul, merge înainte/înapoi sau opri proiecția.</p>
+          <p data-lang="en">In web results, press <strong>📺 Project</strong>. Verses and choruses become a shared session: the remote can select a verse directly, go next/previous, or stop projection.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feat-icon">📱</div>
+          <h3 data-lang="ro">Pașii pentru telefon</h3>
+          <h3 data-lang="en">Phone workflow</h3>
+          <p data-lang="ro">Conectează telefonul și computerul la aceeași rețea Wi-Fi, deschide linkul sau codul QR din aplicație, apoi folosește <strong>/remote</strong>. Alege RO/EN direct în telecomandă.</p>
+          <p data-lang="en">Connect the phone and computer to the same Wi-Fi, open the link or QR code in the app, then use <strong>/remote</strong>. Switch RO/EN directly in the remote.</p>
+        </div>
+      </div>
+
+      <div style="margin:24px auto 0;max-width:900px;background:var(--bg-panel);border:1px solid var(--border-color);border-radius:16px;padding:22px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.6px;color:var(--primary);margin-bottom:8px;" data-lang="ro">COMENZI DISPONIBILE</div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:.6px;color:var(--primary);margin-bottom:8px;" data-lang="en">AVAILABLE CONTROLS</div>
+        <p style="margin:0;color:var(--text-muted);font-size:14px;" data-lang="ro">Pornire, Înapoi, Înainte, Oprire, selectarea directă a unui slide/strofe și glisare stânga/dreapta pe telefon. Pentru controlul unei prezentări PowerPoint este necesar Microsoft PowerPoint instalat pe calculatorul server.</p>
+        <p style="margin:0;color:var(--text-muted);font-size:14px;" data-lang="en">Start, Previous, Next, Stop, direct slide/verse selection, and left/right phone swipes. Controlling a PowerPoint deck requires Microsoft PowerPoint to be installed on the server computer.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Cards Section -->
+  <section class="features" id="functii">
+    <div class="container">
+      <div class="section-title">
+        <h2 data-lang="ro">Caracteristici Principale</h2>
+        <h2 data-lang="en">Core Features</h2>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feat-icon">🔍</div>
+          <h3 data-lang="ro">Căutare fără diacritice</h3>
+          <h3 data-lang="en">Diacritic-insensitive</h3>
+          <p data-lang="ro">Filtrează inteligent "harul" sau "măreț" chiar dacă le tastezi cu greșeli, fără caractere românești speciale.</p>
+          <p data-lang="en">Intelligently matches search terms even if typed without Romanian diacritics or with minor typos.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feat-icon">📡</div>
+          <h3 data-lang="ro">Control Wi-Fi de la distanță</h3>
+          <h3 data-lang="en">Wireless Remote Control</h3>
+          <p data-lang="ro">Nu trebuie să stai blocat la laptopul proiectorului. Folosește telefonul din rețea scanând codul QR.</p>
+          <p data-lang="en">No need to be glued to the computer screen. Control presentation slides from your phone anywhere in the room.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feat-icon">💾</div>
+          <h3 data-lang="ro">Bază de date locală</h3>
+          <h3 data-lang="en">Local Offline Cache</h3>
+          <p data-lang="ro">Toate slide-urile indexate sunt salvate într-un fișier local JSON, funcționând complet offline în timpul slujbelor.</p>
+          <p data-lang="en">All indexed slides are saved in a local JSON index file, making it completely reliable offline.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Setup & Installation Guide Section -->
+  <section class="guide-section" id="ghid">
+    <div class="container">
+      <div class="guide-wrapper">
+        <div>
+          <div class="tabs-header">
+            <button class="tab-pill active" onclick="switchTab(0)">Executabil (.EXE)</button>
+            <button class="tab-pill" onclick="switchTab(1)" data-lang="ro">Rulare Sursă</button>
+            <button class="tab-pill" onclick="switchTab(1)" data-lang="en">Run from Source</button>
+            <button class="tab-pill" onclick="switchTab(2)" data-lang="ro">Configurare Foldere</button>
+            <button class="tab-pill" onclick="switchTab(2)" data-lang="en">Folder Configuration</button>
+          </div>
+
+          <div class="tab-body">
+            <!-- Tab 1 -->
+            <div class="tab-content active">
+              <h3 data-lang="ro">Metoda simplă (Compilată)</h3>
+              <h3 data-lang="en">Precompiled Binary (.EXE)</h3>
+              <p data-lang="ro">Descarcă ultima versiune direct din secțiunea Releases de pe GitHub. Nu ai nevoie de Python instalat.</p>
+              <p data-lang="en">Download the precompiled packages from the GitHub releases page. No Python installation required.</p>
+              <ul style="font-size:13px;color:var(--text-muted);padding-left:20px;">
+                <li><code>ppt_finder.exe</code>: <span data-lang="ro">Deschide interfața desktop.</span><span data-lang="en">Launches the desktop native app wrapper.</span></li>
+                <li><code>ppt_server.exe</code>: <span data-lang="ro">Rulează doar serverul pe fundal.</span><span data-lang="en">Runs the silent backend server.</span></li>
+              </ul>
+            </div>
+
+            <!-- Tab 2 -->
+            <div class="tab-content">
+              <h3 data-lang="ro">Pornire din Python (Dezvoltatori)</h3>
+              <h3 data-lang="en">Starting with Python (Developers)</h3>
+              <p data-lang="ro">Instalează dependințele necesare și pornește scriptul:</p>
+              <p data-lang="en">Install requirements using pip and boot the server application:</p>
+              <pre class="code-block">pip install flask python-pptx pywebview requests pywin32</pre>
+              <p data-lang="ro"><code>pywin32</code> este necesar numai pentru deschiderea și controlul prezentărilor PowerPoint reale; proiecția de versuri web nu depinde de acesta.</p>
+              <p data-lang="en"><code>pywin32</code> is needed only to open and control real PowerPoint presentations; web-lyric projection does not depend on it.</p>
+              <pre class="code-block">python ppt_server.py</pre>
+            </div>
+
+            <!-- Tab 3 -->
+            <div class="tab-content">
+              <h3 data-lang="ro">Baza de fișiere PowerPoint</h3>
+              <h3 data-lang="en">Setting Slide Directories</h3>
+              <p data-lang="ro">Creează un fișier numit <code>config.txt</code> în același folder cu scriptul și adaugă căile complete către folderele tale, câte una pe linie:</p>
+              <p data-lang="en">Create a text file named <code>config.txt</code> inside the directory, listing folder paths to scan (one per line):</p>
+              <pre class="code-block" style="color:var(--primary)">D:\Cantari Biserica\PowerPoint
+C:\Prezentari\Teme</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connection Instructions Sidebar -->
+        <div style="background:var(--bg-panel);border:1px solid var(--border-color);border-radius:16px;padding:30px;">
+          <h3 style="font-family:var(--font-title);margin:0 0 15px 0;" data-lang="ro">Conexiune în Rețea</h3>
+          <h3 style="font-family:var(--font-title);margin:0 0 15px 0;" data-lang="en">Local Network Setup</h3>
+          
+          <ol style="font-size:13px;color:var(--text-muted);padding-left:20px;display:flex;flex-direction:column;gap:12px;margin:0;">
+            <li data-lang="ro">Asigură-te că laptopul și telefonul sunt pe <strong>aceeași rețea Wi-Fi</strong>.</li>
+            <li data-lang="en">Connect the projector computer and your remote phone to the <strong>same Wi-Fi router</strong>.</li>
+
+            <li data-lang="ro">Deschide serverul pe calculatorul conectat la proiector.</li>
+            <li data-lang="en">Launch the server on the laptop wired to your projector screen.</li>
+
+            <li data-lang="ro">Trage fereastra <code>http://localhost:8080/projector</code> pe monitorul secundar și apasă <b>F11</b> pentru ecran complet.</li>
+            <li data-lang="en">Drag the browser view of <code>http://localhost:8080/projector</code> onto the projector and press <b>F11</b>.</li>
+
+            <li data-lang="ro">Scanează codul QR sau deschide <code>http://&lt;IP-calculator&gt;:8080/remote</code>. Telecomanda controlează ultima prezentare PowerPoint deschisă cu <strong>▶ Open</strong> sau ultima proiecție Resurse Creștine trimisă cu <strong>📺 Project</strong>.</li>
+            <li data-lang="en">Scan the QR code or open <code>http://&lt;computer-IP&gt;:8080/remote</code>. The remote controls the last PowerPoint deck opened with <strong>▶ Open</strong> or the last Resurse Creștine projection sent with <strong>📺 Project</strong>.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section">
+    <div class="container">
+      <div class="section-title">
+        <h2 data-lang="ro">Întrebări Frecvente</h2>
+        <h2 data-lang="en">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-lang="ro">Aplicația are nevoie de Microsoft PowerPoint instalat?</span>
+            <span data-lang="en">Does this application require Microsoft PowerPoint installed?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              <span data-lang="ro">Nu pentru căutare, indexare sau proiecția de versuri web: fișierele <code>.pptx</code> pot fi citite cu biblioteci Python. Da pentru deschiderea și controlul unei prezentări PowerPoint reale din <code>/remote</code>; PowerPoint trebuie instalat pe calculatorul server.</span>
+              <span data-lang="en">Not for search, indexing, or web-lyric projection: <code>.pptx</code> files can be read with Python libraries. Yes for opening and controlling a real PowerPoint presentation from <code>/remote</code>; PowerPoint must be installed on the server computer.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-lang="ro">Funcționează fără conexiune la internet?</span>
+            <span data-lang="en">Can I run this without internet access?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              <span data-lang="ro">Da, funcționează perfect offline. Conexiunea la internet este utilizată doar dacă dorești să descarci automat versuri noi din baza de date Resurse Creștine.</span>
+              <span data-lang="en">Yes, it works completely offline. Internet is only required if you perform searches for songs that aren't in your local folder and need to fetch them from the Resurse Creștine online database.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span data-lang="ro">Telecomanda poate controla și cântecele din Resurse Creștine?</span>
+            <span data-lang="en">Can the remote also control Resurse Creștine songs?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              <span data-lang="ro">Da. După ce apeși <code>📺 Project</code> pentru un rezultat web, strofele sunt trimise în sesiunea comună de proiecție. Pagina <code>/remote</code> se schimbă automat în modul Resurse Creștine și oferă aceleași comenzi de navigare și selectare directă.</span>
+              <span data-lang="en">Yes. After you press <code>📺 Project</code> for a web result, its verses are sent to the shared projection session. The <code>/remote</code> page automatically switches to Resurse Creștine mode and offers the same navigation and direct-selection controls.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-logo">
+        <span style="color:var(--primary)">▲</span>
+        <span>PPT Finder Portal</span>
+      </div>
+      <p>PPT Finder &copy; 2026. <span data-lang="ro">Dezvoltat cu pasiune pentru suportul comunităților locale.</span><span data-lang="en">Developed with passion to support local communities.</span></p>
+    </div>
+  </footer>
+
+  <!-- Mock Simulator Logic -->
+  <script>
+    // Real Control Panel HTML copied from ppt_server.py
+    const controlPanelHtml = `<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <script>
+    // Mock data for the simulator
+    window.mockFolders = ["D:\\Cantari Biserica\\PPT", "C:\\Prezentari"];
+    window.mockSongs = [
+      {
+        id: 1,
+        title: "Harul Tău ne-a salvat",
+        path: "D:\\Cantari Biserica\\PPT\\Harul Tau.pptx",
+        slides: [
+          "Harul Tău ne-a salvat, viață nouă ne-a dat,\nPrin jertfa Ta pe cruce, noi suntem iertați.",
+          "Refren:\nO, ce har minunat, dragoste făr' de hotar,\nTe slăvim, Te lăudăm, veșnic Te adorăm!",
+          "Strofa 2:\nPrin credință trăim, calea Ta o urmăm,\nSpre cerești înălțimi, doar pe Tine Te vrem."
+        ]
+      },
+      {
+        id: 2,
+        title: "Te laud, Creatorul meu",
+        path: "D:\\Cantari Biserica\\PPT\\Te laud.pptx",
+        slides: [
+          "Te laud, Creatorul meu, în fiecare zi,\nTu ești adăpostul meu în vremuri de furtună.",
+          "Refren:\nMăreț ești Doamne, Numele Tău îl înălțăm,\nÎn cer și pe pământ, doar Ție ne-nchinăm!",
+          "Strofa 2:\nPrin orice încercare, Tu mă ții de mână,\nDragostea Ta e mare, viața mea-i lumină."
+        ]
+      },
+      {
+        id: 3,
+        title: "Mare este credincioșia Ta",
+        path: "C:\\Prezentari\\Credinciosia Ta.pptx",
+        slides: [
+          "Mare este credincioșia Ta, o, Doamne,\nNu se schimbă mila Ta în veci de veci.",
+          "Refren:\nZi de zi ne porți de grijă cu iubire,\nCredincios rămâi mereu, Părinte sfânt!"
+        ]
+      }
+    ];
+    window.activeProjectionText = "";
+
+    // Override fetch to act locally inside the simulator
+    window.fetch = async function(url, options) {
+      if (url.startsWith('/api/folders')) {
+        if (options && options.method === 'POST') {
+          const data = JSON.parse(options.body);
+          window.mockFolders.push(data.path);
+          return new Response(JSON.stringify({ success: true }));
+        }
+        if (options && options.method === 'DELETE') {
+          const urlParams = new URLSearchParams(url.split('?')[1]);
+          const index = parseInt(urlParams.get('index'));
+          window.mockFolders.splice(index, 1);
+          return new Response(JSON.stringify({ success: true }));
+        }
+        return new Response(JSON.stringify(window.mockFolders));
+      }
+      if (url.startsWith('/api/status')) {
+        return new Response(JSON.stringify({
+          status: "completed",
+          text: "Index completed. Total: " + window.mockSongs.length + " files.",
+          progress: 1.0,
+          total_files: window.mockSongs.length
+        }));
+      }
+      if (url.startsWith('/api/reindex')) {
+        return new Response(JSON.stringify({ success: true }));
+      }
+      if (url.startsWith('/api/search/web')) {
+        const urlParams = new URLSearchParams(url.split('?')[1]);
+        const q = (urlParams.get('q') || '').trim();
+        if (!q) return new Response(JSON.stringify([]));
+        return new Response(JSON.stringify([{
+          id: 'web-1',
+          title: 'Suflete, laudă-L pe Domnul',
+          title_slug: 'suflete-lauda-l-pe-domnul',
+          slug: 'cantece',
+          author: 'Demo Resurse Creștine',
+          url: 'https://www.resursecrestine.ro/cantece'
+        }]));
+      }
+      if (url.startsWith('/api/lyrics/web')) {
+        return new Response(JSON.stringify([
+          { label: 'Strofa 1', text: 'Suflete, laudă-L pe Domnul, Creatorul tău,\nCăci El ți-a dat viață și te scapă de rău.' },
+          { label: 'Refren', text: 'Laudă-L, laudă-L, suflete al meu,\nCântă-I laudă doar lui Dumnezeu!' }
+        ]));
+      }
+      if (url.startsWith('/api/slides/local')) {
+        const urlParams = new URLSearchParams(url.split('?')[1]);
+        const path = decodeURIComponent(urlParams.get('path') || '');
+        const song = window.mockSongs.find(s => s.path === path) || window.mockSongs[0];
+        return new Response(JSON.stringify(song.slides.map((text, index) => ({
+          label: index === 1 ? 'Refren' : 'Slide ' + (index + 1), text
+        }))));
+      }
+      if (url.startsWith('/api/search')) {
+        const urlParams = new URLSearchParams(url.split('?')[1]);
+        const q = (urlParams.get('q') || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const filtered = window.mockSongs.filter(s => {
+          return s.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q);
+        });
+        return new Response(JSON.stringify(filtered.map(s => ({
+          name: s.path.split('\\').pop(),
+          title: s.title,
+          path: s.path,
+          snippet: s.slides[0]
+        }))));
+      }
+      if (url.startsWith('/api/song/')) {
+        const id = parseInt(url.split('/').pop());
+        const song = window.mockSongs.find(s => s.id === id);
+        return new Response(JSON.stringify({
+          title: song.title,
+          path: song.path,
+          slides: song.slides
+        }));
+      }
+      if (url.startsWith('/api/open')) {
+        return new Response(JSON.stringify({ success: true }));
+      }
+      if (url.startsWith('/api/projection/current')) {
+        if (options && options.method === 'POST') {
+          const data = JSON.parse(options.body);
+          window.activeProjectionText = data.text || '';
+          window.parent.postMessage({ type: 'project', text: window.activeProjectionText }, '*');
+          return new Response(JSON.stringify({ success: true }));
+        }
+        return new Response(JSON.stringify({ text: window.activeProjectionText, label: '', timestamp: Date.now() }));
+      }
+      return new Response(JSON.stringify({}));
+    };
+  <\/script>
+
+  <meta charset="UTF-8">
+  <title>PPT Finder Web</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0b0b0f;
+      --panel-bg: #12121c;
+      --card-bg: #161625;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --primary-accent: #00b0ff;
+      --secondary-accent: #00e5ff;
+      --text-main: #f0f0f5;
+      --text-muted: #8d8da0;
+      --text-sub: #636375;
+      --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(0, 176, 255, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(0, 229, 255, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 25px auto;
+      padding: 0 24px;
+      width: 100%;
+      box-sizing: border-box;
+      flex: 1;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .title-group h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .title-group p {
+      margin: 5px 0 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .network-ip {
+      font-size: 12px;
+      color: var(--primary-accent);
+      background: rgba(0, 176, 255, 0.06);
+      border: 1px solid rgba(0, 176, 255, 0.15);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .settings-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .settings-btn:hover {
+      border-color: var(--primary-accent);
+      color: var(--text-main);
+      box-shadow: 0 0 10px rgba(0, 176, 255, 0.15);
+    }
+
+    /* Settings Panel */
+    .settings-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      display: none;
+    }
+
+    .settings-panel.active {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    .settings-panel h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 16px;
+      color: var(--primary-accent);
+    }
+
+    .folder-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 15px 0;
+    }
+
+    .folder-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .folder-item span {
+      word-break: break-all;
+      padding-right: 10px;
+    }
+
+    .delete-folder-btn {
+      background: rgba(255, 80, 80, 0.1);
+      border: 1px solid rgba(255, 80, 80, 0.2);
+      color: #ff6060;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .delete-folder-btn:hover {
+      background: rgba(255, 80, 80, 0.25);
+      border-color: rgba(255, 80, 80, 0.4);
+    }
+
+    .add-folder-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .add-folder-group input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .add-folder-group input:focus {
+      border-color: var(--primary-accent);
+    }
+
+    .add-folder-btn {
+      background: var(--primary-accent);
+      border: none;
+      color: #000;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: opacity 0.2s;
+    }
+
+    .add-folder-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* Search Area */
+    .search-container {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 52px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0 20px 0 50px;
+      color: var(--text-main);
+      font-size: 16px;
+      box-sizing: border-box;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary-accent);
+      box-shadow: 0 0 15px rgba(0, 176, 255, 0.15);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 18px;
+      top: 15px;
+      font-size: 20px;
+      color: var(--text-muted);
+    }
+
+    /* Progress Banner */
+    .progress-banner {
+      background: rgba(0, 176, 255, 0.05);
+      border: 1px solid rgba(0, 176, 255, 0.15);
+      border-radius: 10px;
+      padding: 15px 20px;
+      margin-bottom: 25px;
+      display: none;
+    }
+
+    .progress-banner.active {
+      display: block;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--primary-accent);
+    }
+
+    .progress-track {
+      background: rgba(255, 255, 255, 0.05);
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-accent), var(--secondary-accent));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Layout Columns */
+    .main-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 850px) {
+      .main-columns {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .network-ip {
+        margin-right: 0;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+      }
+      .container {
+        margin: 15px auto;
+        padding: 0 16px;
+      }
+
+      .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .settings-btn {
+        min-height: 36px;
+      }
+
+      .add-folder-group {
+        flex-wrap: wrap;
+      }
+
+      .add-folder-group input {
+        min-width: 0;
+      }
+
+      .drawer-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .drawer-title {
+        max-width: 100%;
+      }
+
+      .drawer-actions {
+        flex-wrap: wrap;
+      }
+
+      .footer-content {
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 0 12px; }
+      .settings-panel { padding: 14px; }
+      .network-ip { font-size: 11px; overflow-wrap: anywhere; }
+      .add-folder-group > * { width: 100%; }
+      .add-folder-btn { min-height: 38px; }
+      .folder-item { align-items: flex-start; gap: 8px; }
+      .delete-folder-btn { flex: 0 0 auto; }
+      .card { padding: 12px; }
+      .card-actions { min-width: 72px; }
+      .action-btn { width: 72px; }
+      .projection-drawer { bottom: 10px; width: calc(100% - 20px); padding: 14px; }
+      .drawer-btn { min-height: 34px; }
+      .slides-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .column-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .column-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 15px;
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+      opacity: 0.5;
+    }
+
+    .empty-state h4 {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .empty-state p {
+      margin: 4px 0 0 0;
+      font-size: 12px;
+    }
+
+    /* Card styling */
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      border-color: rgba(0, 176, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .card.selected {
+      border-color: var(--primary-accent);
+      box-shadow: 0 0 15px rgba(0, 176, 255, 0.25);
+      background: rgba(0, 176, 255, 0.04);
+      transform: translateY(-2px);
+    }
+
+    .card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .card-icon {
+      font-size: 16px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f0f0f5;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-author-line {
+      font-size: 11px;
+      color: var(--secondary-accent);
+      margin-bottom: 4px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      opacity: 0.85;
+    }
+
+    .card-path {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      direction: rtl;
+      text-align: left;
+    }
+
+    .card-snippet {
+      font-size: 12px;
+      color: #c5c5d0;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 6px 10px;
+      border-radius: 6px;
+      line-height: 1.4;
+      word-break: break-all;
+    }
+
+    .card-snippet mark {
+      background: rgba(0, 176, 255, 0.2);
+      color: var(--secondary-accent);
+      font-weight: 600;
+      border-radius: 3px;
+      padding: 0 2px;
+      border: 1px solid rgba(0, 176, 255, 0.3);
+    }
+
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .action-btn {
+      width: 88px;
+      padding: 6px 0;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+
+    .btn-primary {
+      background: var(--primary-accent);
+      border: none;
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      box-shadow: 0 0 10px rgba(0, 176, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text-main);
+      color: var(--text-main);
+    }
+
+    .btn-success {
+      background: #00e676;
+      border: none;
+      color: #000;
+    }
+
+    .btn-success:hover {
+      opacity: 0.9;
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+    }
+
+    /* Projection Drawer Panel */
+    .projection-drawer {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 92%;
+      max-width: 820px;
+      background: rgba(18, 18, 28, 0.96);
+      border: 1px solid var(--primary-accent);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 176, 255, 0.2);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: none;
+      z-index: 1000;
+      backdrop-filter: blur(12px);
+      box-sizing: border-box;
+    }
+
+    .projection-drawer.active {
+      display: block;
+      animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .drawer-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary-accent);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 60%;
+    }
+
+    .drawer-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .drawer-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .drawer-btn-projector {
+      background: transparent;
+      border: 1px solid var(--secondary-accent);
+      color: var(--secondary-accent);
+    }
+
+    .drawer-btn-projector:hover {
+      background: var(--secondary-accent);
+      color: #000;
+    }
+
+    .drawer-btn-clear {
+      background: rgba(255, 80, 80, 0.1);
+      border: 1px solid #ff6060;
+      color: #ff6060;
+    }
+
+    .drawer-btn-clear:hover {
+      background: #ff6060;
+      color: #000;
+    }
+
+    .drawer-btn-close {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .drawer-btn-close:hover {
+      border-color: var(--text-main);
+      color: var(--text-main);
+    }
+
+    .slides-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .slide-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 50px;
+      user-select: none;
+    }
+
+    .slide-card:hover {
+      border-color: var(--secondary-accent);
+      background: rgba(0, 229, 255, 0.03);
+    }
+
+    .slide-card.active {
+      background: var(--primary-accent);
+      color: #000;
+      font-weight: 700;
+      border-color: var(--primary-accent);
+      box-shadow: 0 0 10px rgba(0, 176, 255, 0.3);
+    }
+
+    .slide-card-label {
+      font-size: 9px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      font-weight: 700;
+    }
+
+    .slide-card-preview {
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Footer */
+    footer {
+      background: #06060a;
+      border-top: 1px solid var(--border-color);
+      padding: 15px 0;
+      margin-top: 40px;
+    }
+
+    .footer-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .reindex-btn {
+      background: var(--primary-accent);
+      border: none;
+      color: #000;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: opacity 0.2s;
+    }
+
+    .reindex-btn:hover {
+      opacity: 0.9;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translate(-50%, 30px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="title-group">
+        <h1>PPT Finder Web</h1>
+      </div>
+      <div class="header-actions">
+        <span class="network-ip">Network URL: {network_url}</span>
+        <button class="settings-btn" onclick="toggleSettings()">⚙ Folders</button>
+      </div>
+    </header>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settings-panel">
+      <h3>Manage Search Folders</h3>
+      <ul class="folder-list" id="folder-list">
+        <!-- Rendered dynamically -->
+      </ul>
+      <div class="add-folder-group">
+        <input type="text" id="new-folder-input" placeholder="Enter absolute directory path (e.g. D:\\\\My Presentations)">
+        <button class="add-folder-btn" onclick="addFolder()">Add Folder</button>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="search-container">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="search-input" placeholder="Type to search song titles or slide contents..." oninput="onSearchInput()" autofocus>
+    </div>
+
+    <!-- Progress Banner -->
+    <div class="progress-banner" id="progress-banner">
+      <div class="progress-header">
+        <span id="progress-status-text">Indexing files...</span>
+        <span id="progress-percent">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Two Columns Layout -->
+    <div class="main-columns">
+      <!-- Column 1: Local Presentations -->
+      <div>
+        <div class="column-title">
+          <span>Local Presentations</span>
+          <span class="column-meta" id="local-count">Enter a query to search</span>
+        </div>
+        <div class="results-list" id="local-results-list">
+          <div class="empty-state">
+            <div class="icon">💻</div>
+            <h4>Local Files</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2: Web Search (Resurse Crestine) -->
+      <div>
+        <div class="column-title">
+          <span>Web Search (Resurse Creștine)</span>
+          <span class="column-meta" id="web-count">Enter a query to search</span>
+        </div>
+        <div class="results-list" id="web-results-list">
+          <div class="empty-state">
+            <div class="icon">🌐</div>
+            <h4>Resurse Creștine</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Float Drawer for Projection Control -->
+  <div class="projection-drawer" id="projection-drawer">
+    <div class="drawer-header">
+      <span class="drawer-title" id="projector-song-title">Now Projecting: None</span>
+      <div class="drawer-actions">
+        <button class="drawer-btn drawer-btn-projector" onclick="openProjectorWindow()">📺 Open Projector Screen</button>
+        <button class="drawer-btn drawer-btn-clear" onclick="clearProjector()">⏹ Clear</button>
+        <button class="drawer-btn drawer-btn-close" onclick="closeProjectionDrawer()">✖ Close</button>
+      </div>
+    </div>
+    <div class="slides-grid" id="projector-slides-grid">
+      <!-- Clickable slides rendered here -->
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <span id="footer-status">Loading index status...</span>
+      <button class="reindex-btn" id="reindex-btn" onclick="triggerReindex()">Reindex Files</button>
+    </div>
+  </footer>
+
+  <script>
+    let searchDebounceTimeout = null;
+    let isIndexing = false;
+    let selectedResultIndex = -1;
+    let activeProjectionSlideIndex = -1;
+    let projectionSlides = [];
+
+    // Load initial configuration folders and status
+    fetchFolders();
+    pollStatus();
+    setInterval(pollStatus, 1500); // regular polling for status updates
+
+    function toggleSettings() {
+      const panel = document.getElementById('settings-panel');
+      panel.classList.toggle('active');
+    }
+
+    async function fetchFolders() {
+      try {
+        const res = await fetch('/api/folders');
+        const folders = await res.json();
+        const list = document.getElementById('folder-list');
+        list.innerHTML = '';
+        
+        folders.forEach((folder, idx) => {
+          const li = document.createElement('li');
+          li.className = 'folder-item';
+          li.innerHTML = \`
+            <span>\${folder}</span>
+            <button class="delete-folder-btn" onclick="deleteFolder(\${idx})">Remove</button>
+          \`;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        console.error("Error fetching folders:", err);
+      }
+    }
+
+    async function addFolder() {
+      const input = document.getElementById('new-folder-input');
+      const path = input.value.trim();
+      if (!path) return;
+
+      try {
+        const res = await fetch('/api/folders', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({path})
+        });
+        const status = await res.json();
+        if (status.success) {
+          input.value = '';
+          fetchFolders();
+          triggerReindex(); // auto reindex when folder added
+        } else {
+          alert("Error adding folder: " + status.error);
+        }
+      } catch (err) {
+        alert("Server communication error.");
+      }
+    }
+
+    async function deleteFolder(index) {
+      try {
+        const res = await fetch(\`/api/folders?index=\${index}\`, {
+          method: 'DELETE'
+        });
+        const status = await res.json();
+        if (status.success) {
+          fetchFolders();
+          triggerReindex(); // auto reindex on removal
+        }
+      } catch (err) {
+        console.error("Error deleting folder:", err);
+      }
+    }
+
+    function onSearchInput() {
+      clearTimeout(searchDebounceTimeout);
+      searchDebounceTimeout = setTimeout(performSearch, 200);
+    }
+
+    async function performSearch() {
+      const query = document.getElementById('search-input').value.trim();
+      const localResultsList = document.getElementById('local-results-list');
+      const webResultsList = document.getElementById('web-results-list');
+      const localCount = document.getElementById('local-count');
+      const webCount = document.getElementById('web-count');
+
+      selectedResultIndex = -1;
+
+      if (!query) {
+        localCount.innerText = "Enter a query to search";
+        webCount.innerText = "Enter a query to search";
+        localResultsList.innerHTML = \`
+          <div class="empty-state">
+            <div class="icon">💻</div>
+            <h4>Local Files</h4>
+          </div>
+        \`;
+        webResultsList.innerHTML = \`
+          <div class="empty-state">
+            <div class="icon">🌐</div>
+            <h4>Resurse Creștine</h4>
+          </div>
+        \`;
+        return;
+      }
+
+      // 1. Perform Local Search
+      try {
+        const res = await fetch(\`/api/search?q=\${encodeURIComponent(query)}\`);
+        const results = await res.json();
+
+        if (results.length === 0) {
+          localCount.innerText = "No matches found";
+          localResultsList.innerHTML = \`
+            <div class="empty-state">
+              <div class="icon">ℹ️</div>
+              <h4>No matches found</h4>
+              <p>Try refining your query or click 'Reindex'</p>
+            </div>
+          \`;
+        } else {
+          localCount.innerText = \`Top \${results.length} results\`;
+          localResultsList.innerHTML = '';
+
+          results.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = \`local-card-\${index}\`;
+            
+            card.onclick = () => {
+              const prev = document.querySelector('.card.selected');
+              if (prev) prev.classList.remove('selected');
+              selectedResultIndex = index;
+              card.classList.add('selected');
+            };
+
+            const isPptx = item.name.toLowerCase().endsWith('.pptx');
+            const fileIcon = isPptx ? '📊' : '📄';
+            let snippetHtml = item.snippet ? \`<div class="card-snippet">\${item.snippet}</div>\` : '';
+
+            card.innerHTML = \`
+              <div class="card-info">
+                <div class="card-title-row">
+                  <span class="card-icon">\${fileIcon}</span>
+                  <span class="card-title" title="\${item.title}">\${item.title}</span>
+                </div>
+                <div class="card-path" title="\${item.path}">\${item.path}</div>
+                \${snippetHtml}
+              </div>
+              <div class="card-actions">
+                <button class="action-btn btn-primary" onclick="event.stopPropagation(); openFile('\${encodeURIComponent(item.path)}')">▶ Open</button>
+              </div>
+            \`;
+            localResultsList.appendChild(card);
+          });
+
+          // Auto-select first local result
+          const cards = document.querySelectorAll('#local-results-list .card');
+          if (cards.length > 0) {
+            selectedResultIndex = 0;
+            cards[0].classList.add('selected');
+          }
+        }
+      } catch (err) {
+        console.error("Local search failed:", err);
+      }
+
+      // 2. Perform Web Search (Resurse Crestine)
+      webCount.innerText = "Searching web...";
+      webResultsList.innerHTML = \`
+        <div class="empty-state">
+          <div class="icon">⏳</div>
+          <h4>Searching...</h4>
+          <p>Querying resursecrestine.ro web API</p>
+        </div>
+      \`;
+
+      try {
+        const res = await fetch(\`/api/search/web?q=\${encodeURIComponent(query)}\`);
+        const results = await res.json();
+
+        if (results.length === 0) {
+          webCount.innerText = "No web matches";
+          webResultsList.innerHTML = \`
+            <div class="empty-state">
+              <div class="icon">ℹ️</div>
+              <h4>No matches found on web</h4>
+              <p>Check spelling or search local database</p>
+            </div>
+          \`;
+        } else {
+          webCount.innerText = \`Found \${results.length} songs\`;
+          webResultsList.innerHTML = '';
+
+          results.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            card.innerHTML = \`
+              <div class="card-info">
+                <div class="card-title-row">
+                  <span class="card-icon">🎵</span>
+                  <span class="card-title" title="\${item.title}">\${item.title}</span>
+                </div>
+                <div class="card-author-line">de \${item.author || 'Anonim'}</div>
+                <div class="card-path" title="Link">\${item.url}</div>
+              </div>
+              <div class="card-actions">
+                <button class="action-btn btn-success" onclick="projectWeb('\${item.id}', '\${item.slug}', '\${item.title_slug}', '\${encodeURIComponent(item.title)}')">📺 Project</button>
+                <button class="action-btn btn-secondary" onclick="window.open('\${item.url}', '_blank')">🔗 Web</button>
+              </div>
+            \`;
+            webResultsList.appendChild(card);
+          });
+        }
+      } catch (err) {
+        webCount.innerText = "Web query failed";
+        webResultsList.innerHTML = \`
+          <div class="empty-state">
+            <div class="icon">⚠️</div>
+            <h4>Search failed</h4>
+            <p>Could not connect to Resurse Creștine API</p>
+          </div>
+        \`;
+        console.error("Web search failed:", err);
+      }
+    }
+
+    async function openFile(encodedPath) {
+      try {
+        await fetch(\`/api/open?path=\${encodedPath}\`);
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
+      } catch (err) {
+        console.error("Error opening file:", err);
+      }
+    }
+
+    // --- PROJECTION SYSTEM ---
+
+    async function projectLocal(encodedPath, titleEscaped) {
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) searchInput.blur();
+      
+      const title = decodeURIComponent(titleEscaped);
+      document.getElementById('projector-song-title').innerText = \`Now Projecting: \${title} (Local File)\`;
+      
+      const grid = document.getElementById('projector-slides-grid');
+      grid.innerHTML = \`
+        <div class="empty-state" style="grid-column: 1/-1; padding: 20px;">
+          <p>Extracting slides on-the-fly...</p>
+        </div>
+      \`;
+      document.getElementById('projection-drawer').classList.add('active');
+
+      try {
+        const res = await fetch(\`/api/slides/local?path=\${encodedPath}\`);
+        projectionSlides = await res.json();
+        renderProjectionGrid();
+      } catch (err) {
+        grid.innerHTML = \`<p style="color:#ff6060; grid-column:1/-1;">Failed to load slides: \${err}</p>\`;
+      }
+    }
+
+    async function projectWeb(id, slug, titleSlug, titleEscaped) {
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) searchInput.blur();
+      
+      const title = decodeURIComponent(titleEscaped);
+      document.getElementById('projector-song-title').innerText = \`Now Projecting: \${title} (Web - Resurse Creștine)\`;
+      
+      const grid = document.getElementById('projector-slides-grid');
+      grid.innerHTML = \`
+        <div class="empty-state" style="grid-column: 1/-1; padding: 20px;">
+          <p>Downloading lyrics from Resurse Creștine...</p>
+        </div>
+      \`;
+      document.getElementById('projection-drawer').classList.add('active');
+
+      try {
+        const res = await fetch(\`/api/lyrics/web?id=\${id}&slug=\${slug}&title_slug=\${titleSlug}\`);
+        projectionSlides = await res.json();
+        renderProjectionGrid();
+      } catch (err) {
+        grid.innerHTML = \`<p style="color:#ff6060; grid-column:1/-1;">Failed to fetch lyrics: \${err}</p>\`;
+      }
+    }
+
+    function renderProjectionGrid() {
+      const grid = document.getElementById('projector-slides-grid');
+      grid.innerHTML = '';
+      activeProjectionSlideIndex = -1;
+
+      if (projectionSlides.length === 0) {
+        grid.innerHTML = \`<p style="color:var(--text-muted); grid-column:1/-1; text-align:center;">No slides found in presentation.</p>\`;
+        return;
+      }
+
+      projectionSlides.forEach((slide, index) => {
+        const card = document.createElement('div');
+        card.className = 'slide-card';
+        card.id = \`slide-card-\${index}\`;
+        card.onclick = () => sendSlideToProjector(index);
+
+        card.innerHTML = \`
+          <span class="slide-card-label">\${slide.label}</span>
+          <span class="slide-card-preview" title="\${slide.text.replace(/\\n/g, ' ')}">\${slide.text.replace(/\\n/g, ' ')}</span>
+        \`;
+        grid.appendChild(card);
+      });
+      
+      // Auto-project first slide immediately!
+      sendSlideToProjector(0);
+    }
+
+    async function sendSlideToProjector(index) {
+      if (index < 0 || index >= projectionSlides.length) return;
+
+      // Update UI active card
+      if (activeProjectionSlideIndex >= 0) {
+        const prev = document.getElementById(\`slide-card-\${activeProjectionSlideIndex}\`);
+        if (prev) prev.classList.remove('active');
+      }
+      
+      activeProjectionSlideIndex = index;
+      const currentCard = document.getElementById(\`slide-card-\${index}\`);
+      if (currentCard) {
+        currentCard.classList.add('active');
+        currentCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      const slide = projectionSlides[index];
+      try {
+        await fetch('/api/projection/current', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ text: slide.text, label: slide.label })
+        });
+      } catch (err) {
+        console.error("Failed to post slide text:", err);
+      }
+    }
+
+    async function clearProjector() {
+      if (activeProjectionSlideIndex >= 0) {
+        const prev = document.getElementById(\`slide-card-\${activeProjectionSlideIndex}\`);
+        if (prev) prev.classList.remove('active');
+        activeProjectionSlideIndex = -1;
+      }
+      try {
+        await fetch('/api/projection/current', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ text: '', label: '' })
+        });
+      } catch (err) {
+        console.error("Failed to clear projector:", err);
+      }
+    }
+
+    function openProjectorWindow() {
+      window.open('/projector', 'PPTFinderProjector', 'width=1024,height=768,resizable=yes,scrollbars=no');
+    }
+
+    function closeProjectionDrawer() {
+      clearProjector();
+      document.getElementById('projection-drawer').classList.remove('active');
+    }
+
+    // --- OTHER UI UTILITIES ---
+
+    async function triggerReindex() {
+      try {
+        const btn = document.getElementById('reindex-btn');
+        btn.disabled = true;
+        btn.innerText = "Indexing...";
+        await fetch('/api/reindex', { method: 'POST' });
+        pollStatus();
+      } catch (err) {
+        console.error("Reindex trigger failed:", err);
+      }
+    }
+
+    async function pollStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const state = await res.json();
+
+        const progressBanner = document.getElementById('progress-banner');
+        const fill = document.getElementById('progress-fill');
+        const percentText = document.getElementById('progress-percent');
+        const statusText = document.getElementById('progress-status-text');
+        const reindexBtn = document.getElementById('reindex-btn');
+        const footerStatus = document.getElementById('footer-status');
+
+        footerStatus.innerText = \`Status: \${state.text} | Total Indexed: \${state.total_files} files\`;
+
+        if (state.status === "indexing") {
+          isIndexing = true;
+          reindexBtn.disabled = true;
+          reindexBtn.innerText = "Indexing...";
+          progressBanner.classList.add('active');
+          
+          const percent = Math.round(state.progress * 100);
+          fill.style.width = \`\${percent}%\`;
+          percentText.innerText = \`\${percent}%\`;
+          statusText.innerText = state.text;
+        } else {
+          progressBanner.classList.remove('active');
+          reindexBtn.disabled = false;
+          reindexBtn.innerText = "Reindex Files";
+          
+          if (isIndexing) {
+            isIndexing = false;
+            performSearch();
+          }
+        }
+      } catch (err) {
+        console.error("Status polling failed:", err);
+      }
+    }
+
+    // --- GLOBAL KEYBOARD NAVIGATOR ---
+
+    document.addEventListener('keydown', function(e) {
+      // 1. Settings folder input overrides
+      if (document.activeElement && document.activeElement.id === 'new-folder-input') {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addFolder();
+        }
+        return;
+      }
+      
+      // 2. Control projection slide slides if projection drawer is active
+      const drawer = document.getElementById('projection-drawer');
+      const isSearchFocused = document.activeElement && document.activeElement.id === 'search-input';
+      
+      if (drawer.classList.contains('active') && projectionSlides.length > 0) {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown' || (!isSearchFocused && (e.key === 'Enter' || e.key === ' '))) {
+          e.preventDefault();
+          const next = activeProjectionSlideIndex + 1;
+          if (next < projectionSlides.length) {
+            sendSlideToProjector(next);
+          }
+          return;
+        }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault();
+          const prev = activeProjectionSlideIndex - 1;
+          if (prev >= 0) {
+            sendSlideToProjector(prev);
+          }
+          return;
+        }
+        else if (e.key === 'Escape') {
+          e.preventDefault();
+          closeProjectionDrawer();
+          return;
+        }
+      }
+
+      // 3. Search Result Navigation (Left Column Local results navigation)
+      const cards = document.querySelectorAll('#local-results-list .card');
+      if (cards.length === 0) return;
+      
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (selectedResultIndex >= 0 && selectedResultIndex < cards.length) {
+          cards[selectedResultIndex].classList.remove('selected');
+        }
+        selectedResultIndex = (selectedResultIndex + 1) % cards.length;
+        cards[selectedResultIndex].classList.add('selected');
+        cards[selectedResultIndex].scrollIntoView({ block: 'nearest' });
+      } 
+      else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (selectedResultIndex >= 0 && selectedResultIndex < cards.length) {
+          cards[selectedResultIndex].classList.remove('selected');
+        }
+        selectedResultIndex = (selectedResultIndex - 1 + cards.length) % cards.length;
+        cards[selectedResultIndex].classList.add('selected');
+        cards[selectedResultIndex].scrollIntoView({ block: 'nearest' });
+      } 
+      else if (e.key === 'Enter') {
+        if (selectedResultIndex >= 0 && selectedResultIndex < cards.length) {
+          e.preventDefault();
+          const openBtn = cards[selectedResultIndex].querySelector('.btn-primary');
+          if (openBtn) openBtn.click();
+        }
+      }
+    });
+  <\/script>
+
+</body>
+</html>
+`;
+
+    // Compact standalone simulator. It intentionally mirrors the user flow
+    // without copying the server HTML into a nested JavaScript template.
+    const simulatorHtml = String.raw`<!doctype html>
+<html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0b0b0f;color:#f0f0f5;font:13px Inter,Arial,sans-serif;padding:16px}.title{font-weight:800;color:#00e5ff;margin-bottom:12px}input{width:100%;background:#171725;border:1px solid #303047;border-radius:8px;color:#fff;padding:11px 12px;font:inherit}.hint{color:#9ca3af;font-size:12px;margin:10px 0 14px}.list{display:grid;gap:10px}.card{border:1px solid #2b2b3d;border-radius:10px;padding:12px;background:#141421}.name{font-weight:700}.text{color:#b6b6c6;font-size:12px;margin:6px 0 10px;line-height:1.4}.actions{display:flex;gap:8px}button{border:0;border-radius:7px;padding:8px 10px;background:#00e5ff;color:#001317;font-weight:700;cursor:pointer}button.web{background:#6366f1;color:#fff}.empty{color:#9ca3af;padding:20px 0;text-align:center}</style>
+</head><body><div class="title">PPT Finder · Simulator</div><input id="query" autocomplete="off" placeholder="Caută o cântare sau un cuvânt…"><div class="hint">Alege <b>📺 Proiectează</b> pentru a actualiza ecranul demonstrativ.</div><div class="list" id="list"></div><script>
+const songs=[
+{name:'Harul Tău ne-a salvat',text:'Harul Tău ne-a salvat, viață nouă ne-a dat.'},
+{name:'Te laud, Creatorul meu',text:'Te laud, Creatorul meu, în fiecare zi.'},
+{name:'Mare este credincioșia Ta',text:'Mare este credincioșia Ta, o, Doamne.'}
+];
+const list=document.getElementById('list');const query=document.getElementById('query');
+function project(text){window.parent.postMessage({type:'project',text:text},'*')}
+function addCard(name,text,web){const card=document.createElement('div');card.className='card';const heading=document.createElement('div');heading.className='name';heading.textContent=name;const preview=document.createElement('div');preview.className='text';preview.textContent=text;const actions=document.createElement('div');actions.className='actions';const button=document.createElement('button');button.textContent=web?'📺 Proiectează Resurse':'📺 Proiectează';if(web)button.className='web';button.onclick=()=>project(text);actions.append(button);card.append(heading,preview,actions);list.append(card)}
+function render(){const term=query.value.toLocaleLowerCase();list.textContent='';const matches=songs.filter(song=>song.name.toLocaleLowerCase().includes(term)||song.text.toLocaleLowerCase().includes(term));matches.forEach(song=>addCard(song.name,song.text,false));if(term)addCard('Resurse Creștine · rezultat web','Suflete, laudă-L pe Domnul, Creatorul tău.',true);if(!matches.length&&!term){const empty=document.createElement('div');empty.className='empty';empty.textContent='Introdu un termen de căutare.';list.append(empty)}}
+query.addEventListener('input',render);render();
+<` + '/script></body></html>';
+
+    // Tab switcher logic
+    function switchTab(idx) {
+      const contents = document.querySelectorAll('.tab-content');
+      const pills = document.querySelectorAll('.tab-pill');
+      
+      contents.forEach((el, i) => el.classList.toggle('active', i === idx));
+      pills.forEach((el, i) => el.classList.toggle('active', i === idx));
+    }
+
+    // Language Toggle
+    function setLanguage(lang) {
+      document.documentElement.setAttribute('lang', lang);
+      localStorage.setItem('preferred-lang', lang);
+      
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang-btn') === lang);
+      });
+
+      // Reset projector screen placeholder if empty
+      const screen = document.getElementById('simProjectorScreen');
+      if (screen.innerText.includes('Ecran Proiector') || screen.innerText.includes('Projector Screen') || screen.innerText === '') {
+        if (lang === 'ro') {
+          screen.innerHTML = `Ecran Proiector<br><span style="font-size:12px;color:var(--text-muted)">Selectează o strofă din simulatorul din stânga pentru a proiecta</span>`;
+        } else {
+          screen.innerHTML = `Projector Screen<br><span style="font-size:12px;color:var(--text-muted)">Select a stanza from the left simulator to project</span>`;
+        }
+        screen.style.fontSize = "18px";
+        screen.style.color = "#fff";
+      }
+    }
+
+    function setExperimentalDownloads(enabled) {
+      document.querySelectorAll('[data-github-href][data-hosted-href]').forEach(link => {
+        link.href = enabled ? link.dataset.hostedHref : link.dataset.githubHref;
+      });
+      localStorage.setItem('experimental-downloads', enabled ? 'true' : 'false');
+    }
+
+    // Accordion FAQ toggle
+    function toggleFaq(el) {
+      const item = el.parentElement;
+      const answer = item.querySelector('.faq-answer');
+      const isActive = item.classList.contains('active');
+      
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('active');
+        i.querySelector('.faq-answer').style.maxHeight = '0';
+      });
+
+      if (!isActive) {
+        item.classList.add('active');
+        answer.style.maxHeight = answer.scrollHeight + "px";
+      }
+    }
+
+    // Load simulator control panel
+    function loadSimulator() {
+        const iframe = document.getElementById('simulator-iframe');
+      if (iframe) {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write(simulatorHtml);
+        doc.close();
+      }
+    }
+
+    // Initialize Page
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedLang = localStorage.getItem('preferred-lang') || 'ro';
+      setLanguage(savedLang);
+      loadSimulator();
+
+      const experimentalToggle = document.getElementById('experimental-download-toggle');
+      const useExperimentalDownloads = localStorage.getItem('experimental-downloads') === 'true';
+      experimentalToggle.checked = useExperimentalDownloads;
+      setExperimentalDownloads(useExperimentalDownloads);
+      experimentalToggle.addEventListener('change', () => setExperimentalDownloads(experimentalToggle.checked));
+
+      // Listen for message events from inside the iframe to update the projector screen
+      window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'project') {
+          const screen = document.getElementById('simProjectorScreen');
+          if (screen) {
+            screen.innerHTML = event.data.text.replace(/\n/g, '<br>');
+            screen.style.fontSize = "22px";
+            screen.style.color = "var(--primary)";
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

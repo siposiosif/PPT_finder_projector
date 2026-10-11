@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="{{ ui_language }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Telecomandă PPT - Remote Control</title>
+  <link rel="stylesheet" href="/static/css/remote.css?v=20261009-1">
+</head>
+<body data-access-code="{{ access_code }}" data-language="{{ ui_language }}">
+
+  <div class="container">
+    <header>
+      <h1>📱 PPT Remote</h1>
+      <span class="status-badge" id="status-badge">Verificare...</span>
+    </header>
+
+    <div class="presentation-card">
+      <div class="presentation-title" id="pres-title">Nicio proiecție activă</div>
+      <div class="presentation-meta">
+        <span id="pres-slide-num">Slide - / -</span>
+        <span id="pres-mode">Mod: -</span>
+      </div>
+    </div>
+
+    <!-- Swipeable Active Slide Box -->
+    <div class="current-slide-card" id="swipe-area">
+      <div class="current-slide-preview" id="current-slide-preview">Atingeți 'Next' sau glisați stânga/dreapta</div>
+      <div class="swipe-hint">👈 Glisați pentru Next / Back 👉</div>
+    </div>
+
+    <!-- Quick Function Toggles -->
+    <div class="quick-actions">
+      <button class="btn-quick btn-start" id="btn-start" type="button">
+        <span>▶</span> Pornește (F5)
+      </button>
+      <button class="btn-quick" id="btn-blackout" type="button">
+        <span>⬛</span> Ecran Negru
+      </button>
+      <button class="btn-quick" id="btn-clear" type="button">
+        <span>👁️</span> Ascunde Text
+      </button>
+      <button class="btn-quick" id="btn-stop" type="button">
+        <span>⏹️</span> Oprește
+      </button>
+    </div>
+
+    <div class="slides-section-header">Toate Slide-urile</div>
+    <div class="slides-list" id="slides-list">
+      <!-- Inserat dinamic -->
+    </div>
+  </div>
+
+  <!-- Bottom Large Touch Buttons -->
+  <div class="bottom-nav">
+    <button class="nav-btn-large btn-prev" id="btn-prev" type="button">◀ Înapoi</button>
+    <button class="nav-btn-large btn-next" id="btn-next" type="button">Înainte ▶</button>
+  </div>
+
+  <script src="/static/js/i18n.js?v=20261009-1"></script>
+  <script src="/static/js/remote.js?v=20261009-2"></script>
+</body>
+</html>

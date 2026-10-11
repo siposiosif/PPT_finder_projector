@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="{{ ui_language }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PPT Finder Pro - Căutare Avansată & Proiecție</title>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <link rel="stylesheet" href="/static/css/style.css?v=20261009-1">
+</head>
+<body
+  data-access-code="{{ access_code }}"
+  data-remote-url="{{ remote_url }}"
+  data-projector-url="{{ projector_url }}"
+  data-voice-url="{{ voice_url }}"
+  data-language="{{ ui_language }}"
+  data-com-enabled="{{ 'true' if com_enabled else 'false' }}">
+
+  <!-- App Header -->
+  <header>
+    <div class="logo">
+      <span class="logo-icon">📊</span>
+      <span class="logo-text">PPT Finder <small>Pro</small></span>
+    </div>
+
+    <div class="header-actions">
+      <a class="nav-btn" id="voice-app-link" href="#" target="ppt-voice" rel="noopener" hidden>🎙 Voce · aplicație separată</a>
+      <button class="nav-btn theme-toggle" id="theme-toggle" type="button" aria-label="Schimbă tema" title="Schimbă tema">
+        <span id="theme-toggle-icon" aria-hidden="true">◐</span>
+        <span id="theme-toggle-label">Temă sistem</span>
+      </button>
+      <button class="nav-btn" id="remote-toggle-btn" type="button">
+        <span>📱</span> Telecomandă
+      </button>
+      <button class="nav-btn" id="projector-window-btn" type="button">
+        <span>📺</span> Ecran proiecție
+      </button>
+      <button class="nav-btn" id="settings-btn" type="button">
+        <span>⚙️</span> Setări Foldere
+      </button>
+    </div>
+  </header>
+
+  <div class="operator-notice" id="operator-notice" role="status" aria-live="polite" hidden>
+    <span id="operator-notice-text"></span>
+    <button type="button" class="icon-close-btn" id="notice-close-btn" aria-label="Închide mesajul">&times;</button>
+  </div>
+
+  <!-- Progress / Notification Banner -->
+  <div class="progress-banner" id="progress-banner">
+    <div class="progress-info">
+      <span id="progress-status-text">Indexare în curs...</span>
+      <span id="progress-percent">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Settings Panel (Collapsible) -->
+  <section class="settings-panel" id="settings-panel">
+    <div class="settings-header">
+      <h3>📁 Foldere Configurate pentru Indexare</h3>
+      <button class="icon-close-btn" id="settings-close-btn" type="button">&times;</button>
+    </div>
+    <div class="settings-body">
+      <div class="folder-input-row">
+        <input type="text" id="new-folder-input" placeholder="Adaugă cale folder (ex: D:\Prezentari\Cantari)...">
+        <button class="btn btn-primary" id="add-folder-btn" type="button">Adaugă Folder</button>
+      </div>
+      <ul class="folder-list" id="folder-list">
+        <!-- Inserat dinamic -->
+      </ul>
+      <div class="settings-footer">
+        <button class="btn btn-warning" id="reindex-btn" type="button">Reindexează Toate Fișierele</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search Hero Bar -->
+  <section class="search-section">
+    <div class="search-intro">
+      <span class="eyebrow">CONSOLA OPERATORULUI</span>
+      <h1>Caută. Pregătește. Proiectează.</h1>
+      <p>Deschide PPT/PPTX în aplicația implicită sau proiectează textul în fereastra pentru public.</p>
+    </div>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" aria-label="Caută prezentări, cântece și versete" placeholder="Titlu, vers, #124 sau Ioan 3:16…" autofocus autocomplete="off">
+      <button class="clear-btn" id="search-clear-btn" type="button" aria-label="Șterge căutarea">&times;</button>
+    </div>
+    <p class="search-help">↑ ↓ selectează rezultatul local · Enter deschide fișierul · căutările funcționează independent</p>
+  </section>
+
+  <!-- Main Multi-Column Results View -->
+  <main class="results-container">
+    
+    <!-- Column 1: Local PPT/PPTX Files -->
+    <div class="results-column" id="local-column">
+      <div class="column-header">
+        <div class="column-title">
+          <span class="col-icon">💻</span>
+          <h2>Fișiere Locale PPT / PPTX</h2>
+        </div>
+        <span class="badge" id="local-count">Tastați pentru a căuta</span>
+      </div>
+      <div class="results-list" id="local-results-list">
+        <div class="empty-state">
+          <div class="empty-icon">💻</div>
+          <h4>Căutare Locală Instantă</h4>
+          <p>Scrieți un titlu, număr sau vers din cântec.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 2: Web Lyrics (Resurse Crestine) -->
+    <div class="results-column" id="web-column">
+      <div class="column-header">
+        <div class="column-title">
+          <span class="col-icon">🌐</span>
+          <h2>Resurse Creștine</h2>
+        </div>
+        <span class="badge" id="web-count">Tastați pentru a căuta</span>
+      </div>
+      <div class="results-list" id="web-results-list">
+        <div class="empty-state">
+          <div class="empty-icon">🌐</div>
+          <h4>Cântece Online & Cache Offline</h4>
+          <p>Caută și proiectează cântece din baza de date Resurse Creștine.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3: Bible Verses -->
+    <div class="results-column" id="bible-column">
+      <div class="column-header">
+        <div class="column-title">
+          <span class="col-icon">📖</span>
+          <h2>Biblia</h2>
+        </div>
+        <div class="bible-controls">
+          <select id="bible-version-select">
+            {% for version in bible_versions %}
+            <option value="{{ version.key }}"{% if version.key == 'ron-rccv' %} selected{% endif %}>{{ version.name }}</option>
+            {% endfor %}
+          </select>
+          <span class="badge" id="bible-count">Tastați</span>
+        </div>
+      </div>
+      <div class="results-list" id="bible-results-list">
+        <div class="empty-state">
+          <div class="empty-icon">📖</div>
+          <h4>Biblia Integrată</h4>
+          <p>Căutați referințe (ex: <em>Ioan 3:16</em>, <em>Genesa 1:1-3</em>) sau cuvinte cheie.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Projection Drawer (Active Slide Controller) -->
+  <aside class="projection-drawer" id="projection-drawer">
+    <div class="drawer-header">
+      <div class="drawer-info">
+        <span class="live-dot"></span>
+        <div><h3 id="projector-song-title">Proiecție Activă</h3><span id="projection-mode">Proiecție web · text extras</span></div>
+      </div>
+      <div class="drawer-actions">
+        <!-- Blackout Toggle -->
+        <button class="btn btn-primary" id="drawer-start-btn" type="button" hidden>Pornește slideshow</button>
+        <button class="btn btn-outline" id="drawer-blackout-btn" type="button" aria-pressed="false" title="Ecran Negru (B, în afara câmpurilor de text)">
+          ⬛ Ecran Negru
+        </button>
+        <!-- Clear Text Toggle -->
+        <button class="btn btn-outline" id="drawer-clear-btn" type="button" aria-pressed="false" title="Ascunde Text (C, în afara câmpurilor de text)">
+          👁️ Ascunde Text
+        </button>
+        <!-- Font Size Controls -->
+        <div class="font-stepper" id="drawer-font-controls">
+          <span class="stepper-label">Font:</span>
+          <button class="stepper-btn" id="font-smaller-btn" type="button" aria-label="Micșorează textul">-</button>
+          <span id="drawer-font-size-val">7.0</span>
+          <button class="stepper-btn" id="font-larger-btn" type="button" aria-label="Mărește textul">+</button>
+        </div>
+        <button class="btn btn-danger" id="stop-projection-btn" type="button">⏹️ Oprește</button>
+      </div>
+    </div>
+    <div class="operator-workspace">
+      <section class="preview-panel current-preview" aria-label="Slide curent">
+        <div class="preview-heading"><span id="projection-visibility">PE ECRAN</span><strong id="current-slide-label"></strong></div>
+        <div class="slide-preview-text" id="current-slide-text"></div>
+      </section>
+      <section class="preview-panel next-preview" aria-label="Slide următor">
+        <div class="preview-heading"><span>URMEAZĂ</span><strong id="next-slide-label"></strong></div>
+        <div class="slide-preview-text" id="next-slide-text"></div>
+      </section>
+      <section class="slide-list-panel" aria-label="Toate slide-urile">
+        <h4>Toate slide-urile</h4>
+        <div class="projector-slides-grid" id="projector-slides-grid"></div>
+      </section>
+    </div>
+    <div class="slide-navigation">
+      <button class="btn" id="previous-slide-btn" type="button">← Înapoi</button>
+      <span id="slide-counter" aria-live="polite">0 / 0</span>
+      <button class="btn btn-primary" id="next-slide-btn" type="button">Următorul →</button>
+      <span class="shortcut-help">← → schimbă slide-ul · B ecran negru · C ascunde textul · comenzile sunt inactive în căutare</span>
+    </div>
+  </aside>
+
+  <!-- Footer Info Bar -->
+  <footer>
+    <div class="footer-left">
+      <span id="connection-status" class="connection-status">● Conectare…</span>
+      <span id="footer-status">Index pregătit</span>
+    </div>
+    <div class="footer-right">
+      <span class="network-badge">{{ access_label }}: <a href="{{ network_url }}" target="_blank">{{ network_url }}</a></span>
+    </div>
+  </footer>
+
+  <!-- Smartphone Remote QR Code Modal -->
+  <div class="modal" id="remote-modal">
+    <div class="modal-content">
+      <button class="close-btn" id="remote-close-btn" type="button" aria-label="Închide telecomanda">&times;</button>
+      <h2>📱 Telecomandă Smartphone</h2>
+      <p class="modal-subtitle">
+        Scanează codul QR sau deschide link-ul pe telefon pentru a controla prezentările și proiecția de la distanță.
+      </p>
+      <div class="qr-box">
+        <canvas id="qr-canvas"></canvas>
+      </div>
+      <div class="remote-link-box">
+        <a id="remote-link" href="#" target="_blank"></a>
+      </div>
+      <div class="instructions-box">
+        <h4>Cum funcționează:</h4>
+        <ol>
+          <li>Asigurați-vă că telefonul este pe <strong>aceeași rețea Wi-Fi</strong>.</li>
+          <li>Scanați codul QR de mai sus cu camera telefonului.</li>
+          <li>Navigați prin slide-uri folosind swipe sau butoanele tactile.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <aside class="voice-suggestion" id="verse-popup-modal" role="status" aria-live="polite" aria-labelledby="verse-popup-title">
+    <div class="voice-suggestion-content verse-modal-content">
+      <button class="close-btn" id="verse-popup-close-btn" type="button" aria-label="Închide">&times;</button>
+      <div class="verse-popup-badge">VERSET DETECTAT DIN VOCE</div>
+      <h2 id="verse-popup-title">Verset detectat</h2>
+      <div class="verse-popup-body">
+        <blockquote id="verse-popup-text">Deschide pentru a vizualiza textul complet.</blockquote>
+      </div>
+      <div class="verse-popup-actions">
+        <button class="btn btn-primary" id="verse-popup-project-btn" type="button">Proiectează</button>
+        <button class="btn btn-secondary" id="verse-popup-print-btn" type="button">Printează</button>
+        <button class="btn btn-outline" id="verse-popup-dismiss-btn" type="button">Închide</button>
+      </div>
+    </div>
+  </aside>
+
+  <script src="/static/js/i18n.js?v=20261009-1"></script>
+  <script src="/static/js/main.js?v=20261010-2"></script>
+</body>
+</html>
